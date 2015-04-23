@@ -2,12 +2,13 @@
 WebSocketBridgeHMDPositionSensorVRDevice を追加した[WebVR Boilerplate](https://github.com/gtk2k/webvr-boilerplate)サンプルページです。  
 WebVR Boilerplate本来のWebVR/キーボード/マウス/Cardboardの対応のほかに、今回追加したWebSocketブリッジデバイス対応の動作確認用です。  後述する問題点に詳しい内容は書いてますが実質Chromeのみ対応という状況となっています。
 * [test.html](http://gtk2k.github.io/test.html) PCでは4000x2000(mp4またはwebm)、モバイルでは1920x960(mp4)にビデオソースを切り替えるページです。
+####コーデック別動作確認用
 * [test_mp4.html](http://gtk2k.github.io/test_mp4.html) PC用:4000x2000でコーデックがh264の動画に限定したページです。
 * [test_vp8.html](http://gtk2k.github.io/test_vp8.html) PC用:4000x2000でコーデックがVP8の動画に限定したページです。
 * [test_vp9.html](http://gtk2k.github.io/test_vp9.html) PC用:4000x2000でコーデックがVP9の動画に限定したページです。
 
 ##動作確認方法
-以下の各種ブラウザーからページにアクセスして画面の下中央にあるWebVRアイコンをクリックするとそれぞれの動作確認が行えます。
+以下の各種ブラウザーから[test.html](http://gtk2k.github.io/test.html)アクセスして画面の下中央にあるWebVRアイコンをクリックするとそれぞれの動作確認が行えます。
 
 
 ###キーボード/マウス
