@@ -14,6 +14,16 @@
       overflow: hidden;
     }
 
+    #tapmsg{
+      position:absolute;
+      left:0;
+      top:0;
+      width:100%;
+      height:100%;
+      line-height:100%;
+      text-align:center;
+    }
+
     #msgDlg {
       text-align: center;
       line-height: 40px;
@@ -236,6 +246,8 @@
     //  console.log('pause');
     //}
     function mobilePlay() {
+      var tapmsg = document.getElementById('tapmsg');
+      document.body.removeChild(tapmsg);
       document.removeEventListener('click', mobilePlay, true);
       event.preventDefault();
       video.play();
@@ -247,6 +259,10 @@
     }
 
     if (deviceType == 'Mobile') {
+      var div = document.createElement('div');
+      div.id = 'tapmsg';
+      div.textContent = '画面をタップしてください';
+      document.body.appendChild(div);
       document.addEventListener('click', mobilePlay, true);
     } else {
       video.oncanplaythrough = function () {
