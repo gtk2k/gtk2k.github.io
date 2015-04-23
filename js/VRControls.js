@@ -13,31 +13,27 @@ THREE.VRControls = function ( object, onError, normalInput ) {
 
 	function filterInvalidDevices( devices ) {
 
-		var
-			OculusDeviceName = 'VR Position Device (oculus)',
-			CardboardDeviceName = 'VR Position Device (cardboard)';
+	  // Exclude Cardboard position sensor if Oculus exists.
 
+	  var oculusDevices = devices.filter(function (device) {
 
-		// Exclude Cardboard position sensor if Oculus exists.
-		var oculusDevices = devices.filter( function ( device ) {
+	    return device.deviceName.toLowerCase().indexOf('oculus') !== -1;
 
-			return device.deviceName === OculusDeviceName;
+	  });
 
-		} );
+	  if (oculusDevices.length >= 1) {
 
-		if ( oculusDevices.length >= 1 ) {
+	    return devices.filter(function (device) {
 
-			return devices.filter( function ( device ) {
+	      return device.deviceName.toLowerCase().indexOf('cardboard') === -1;
 
-				return device.deviceName !== CardboardDeviceName;
+	    });
 
-			} );
+	  } else {
 
-		} else {
+	    return devices;
 
-			return devices;
-
-		}
+	  }
 
 	}
 
