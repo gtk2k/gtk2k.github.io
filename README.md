@@ -1,6 +1,6 @@
 # gtk2k.github.io
 WebSocketBridgeHMDPositionSensorVRDevice を追加したWebVR Boilerplateサンプルページです。  
-WebVR Boilerplate本来のWebVR/キーボード/マウス/Cardboardの対応のほかに、今回追加したWebSocketブリッジデバイス対応の動作確認用です。
+WebVR Boilerplate本来のWebVR/キーボード/マウス/Cardboardの対応のほかに、今回追加したWebSocketブリッジデバイス対応の動作確認用です。  
 IE11はビデオテクスチャーに対応しておらず、Firefoxはビデオテクスチャーに対応しているのですがものすごく重くなり、OperaやVivaldiはOcuBriが現在サポートしていないため、実質Chromeのみ対応という状況となっています。
 * [test.html](http://gtk2k.github.io/test.html) PCでは4000x2000(mp4またはwebm)、モバイルでは1920x960(mp4)にビデオソースを切り替えるページです。
 * [test_mp4.html](http://gtk2k.github.io/test_mp4.html) PC用:4000x2000でコーデックがh264の動画に限定したページです。
