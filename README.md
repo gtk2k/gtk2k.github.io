@@ -6,7 +6,7 @@ IE11はビデオテクスチャーに対応しておらず、Firefoxはビデオ
 * [test_vp8.html](http://gtk2k.github.io/test_vp8.html) PC用:4000x2000でコーデックがVP8の動画に限定したページです。
 * [test_vp9.html](http://gtk2k.github.io/test_vp9.html) PC用:4000x2000でコーデックがVP9の動画に限定したページです。
 
-##確認方法
+##動作確認方法
 以下の各種ブラウザーからページにアクセスして画面の下中央にあるWebVRアイコンをクリックするとそれぞれの動作確認が行えます。
 * WebVR: ChromeのWebVRビルド版を使用してページにアクセスします。
 * Cardbard: AndroidのChromeを使用してページにアクセスします。
