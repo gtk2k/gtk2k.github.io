@@ -136,20 +136,20 @@
     }
 
     video.loop = true;
-    //if (deviceType === 'PC') {
-    //  if (browser == 'chrome') {
-    //    //video.src = '/media/MaryOculus.webm';
-    //    video.src = 'media/4000x2000.webm';
-    //  } else {
-    //    video.src = 'media/4000x2000.mp4';
-    //  }
-    //} else {
-    //  if (isWebVRSupport) {
-    video.src = 'media/1920x960.webm';
-    //  } else {
-    //    video.src = 'media/1920x960.mp4';
-    //  }
-    //}
+    if (deviceType === 'PC') {
+      if (browser == 'chrome') {
+        //video.src = '/media/MaryOculus.webm';
+        video.src = 'media/4000x2000.webm';
+      } else {
+        video.src = 'media/4000x2000.mp4';
+      }
+    } else {
+      if (isWebVRSupport) {
+        video.src = 'media/1920x960.webm';
+      } else {
+        video.src = 'media/1920x960.mp4';
+      }
+    }
     
     window.addEventListener('keydown', function (event) {
       if (event.keyCode == 90) { // z
