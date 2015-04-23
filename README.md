@@ -16,12 +16,13 @@ PCからページにアクセスした時点でキーボード(WASD)やマウス
 ###WebVR
 Oculus Riftのディスプレイモードをダイレクトモード(Direct HMD Access from Apps)にした後、 [ChromeのWebVRビルド版](https://docs.google.com/file/d/0BzudLt22BqGRS3hjOXV3N0JXcjg/edit?pli=1)でページにアクセスします。
 ###Cardbard
-Chrome for Androidでページにアクセスします。
+Chrome for Androidでページにアクセスし、一度画面をタップします。
 ###WebSocketブリッジ([OcuBri](https://github.com/gtk2k/OcuBri))
 Oculus Riftのディスプレイモードを拡張モード(Extend Desktop to the HMD)にした後、PC用Chromeの安定版(WebVR非対応ブラウザー)でアクセスし、[OcuBri](https://github.com/gtk2k/OcuBri)を実行した後でアイコンをクリックしてください。ブラウザーと[OcuBri](https://github.com/gtk2k/OcuBri)の実行順は前後してもかまいません。
 
 ##問題点
 私のマシン環境が多分に影響していると思いますが以下の問題点があります。
+* 映像が表示されるまでちょっと間があります。
 * IE11はビデオテクスチャーに対応していないようです。
 * Firefoxではビデオテクスチャーを使用している時点で重いです。
 * OperaやVivaldiは現時点でOcuBriがサポートしていません。
