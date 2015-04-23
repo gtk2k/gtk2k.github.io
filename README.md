@@ -1,7 +1,7 @@
 # gtk2k.github.io
 WebSocketブリッジデバイスを追加サポートした[WebVR Boilerplate](https://github.com/gtk2k/webvr-boilerplate)の動作確認サンプルページです。  
 WebVR Boilerplate本来のWebVR/キーボード/マウス/Cardboardの対応のほかに、今回追加したWebSocketブリッジデバイス対応の動作確認用です。  後述する問題点に詳しい内容は書いてますが実質Chromeのみ対応という状況となっています。
-OcuBriはリポジトリからDLしてきてもいいですが、[実行ファイルおよび依存DLLをZIPにまとめたものをUP](https://www.dropbox.com/s/iy43mbwdi4m2qvk/OcuBri.zip?dl=0)してますのでこちらからDLしたほうが早いでしょう。
+OcuBriはリポジトリからDLしてきてもいいですが、[OcuBri実行ファイルおよび依存DLLをZIPにまとめたものをUP](https://www.dropbox.com/s/iy43mbwdi4m2qvk/OcuBri.zip?dl=0)してますのでこちらからDLしたほうが早いでしょう。
 * [test.html](http://gtk2k.github.io/test.html) 
 
 ####コーデック別動作確認用
