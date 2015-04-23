@@ -12,7 +12,7 @@ IE11はビデオテクスチャーに対応しておらず、Firefoxはビデオ
 キーボード/マウス操作はPCからページにアクセスした時点でキーボードやマウスでの操作ができます。
 * WebVR: ChromeのWebVRビルド版
 * Cardbard: Chrome for Android
-* WebSocketブリッジ([OcuBri](https://github.com/gtk2k/OcuBri)): PC用Chromeの安定版でアクセスし、[OcuBri](https://github.com/gtk2k/OcuBri)を実行した後でアイコンをクリックしてください。
+* WebSocketブリッジ([OcuBri](https://github.com/gtk2k/OcuBri)): PC用Chromeの安定版(WebVR非対応ブラウザー)でアクセスし、[OcuBri](https://github.com/gtk2k/OcuBri)を実行した後でアイコンをクリックしてください。
 
 ##問題点
 私のマシン環境が多分に影響していると思いますが以下の問題点があります。
