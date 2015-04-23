@@ -12,7 +12,8 @@ IE11はビデオテクスチャーに対応しておらず、Firefoxはビデオ
 
 
 ####キーボード/マウス
-PCからページにアクセスした時点でキーボード(WASD)やマウスでの操作ができます。
+PCからページにアクセスした時点でキーボード(WASD)やマウスでの操作ができます。  
+
 ###WebVR
 Oculus Riftのディスプレイモードをダイレクトモード(Direct HMD Access from Apps)にした後、 [ChromeのWebVRビルド版](https://docs.google.com/file/d/0BzudLt22BqGRS3hjOXV3N0JXcjg/edit?pli=1)でページにアクセスします。
 ###Cardbard
