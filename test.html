@@ -154,8 +154,20 @@
         video.src = 'media/4000x2000.mp4';
       }
     } else {
+      var tapmsg = document.createElement('div');
+      tapmsg.id = 'tapmsg';
+      tapmsg.textContent = 'しばらくお待ちください';
+      document.body.appendChild(tapmsg);
       if (isWebVRSupport) {
-        video.src = 'media/4096x2048.mp4';
+        var xhr = new XMLHttpRequest();
+        xhr.res = 'blob';
+        xhr.open('4096x2048.mp4');
+        xhr.onload = function () {
+          video.src = URL.createObjectURL(xhr.response);
+          var tapmsg = document.getElementById('tapmsg');
+          tapms.textContent = '画面をタップしてください';
+          document.addEventListener('click', mobilePlay, true);
+        }
       } else {
         video.src = 'media/1920x960.mp4';
       }
@@ -259,13 +271,7 @@
       }, 10000);
     }
 
-    if (deviceType == 'Mobile') {
-      var div = document.createElement('div');
-      div.id = 'tapmsg';
-      div.textContent = '画面をタップしてください';
-      document.body.appendChild(div);
-      document.addEventListener('click', mobilePlay, true);
-    } else {
+    if (deviceType == 'PC') {
       video.oncanplaythrough = function () {
         video.oncanplaythrough = null;
         if (urlArgs.pg == 'pause') {
