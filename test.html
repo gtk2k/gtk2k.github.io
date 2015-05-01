@@ -157,7 +157,13 @@
       var tapmsg = document.createElement('div');
       tapmsg.id = 'tapmsg';
       tapmsg.textContent = 'しばらくお待ちください';
+      var prg = document.createElement('div');
+      prg.style.position = 'absolute';
+      prg.style.height = '5px';
+      prg.style.width = '0'
+      prg.style.background = '#aaccff';
       document.body.appendChild(tapmsg);
+      document.body.appendChild(prg);
       if (isWebVRSupport) {
         var xhr = new XMLHttpRequest();
         xhr.res = 'blob';
@@ -173,7 +179,7 @@
           }
         }
         xhr.onprogress = function (e) {
-          e.loaded / e.total;
+          prg.style.width = (e.loaded / e.total * 100) + 'px';
         }
         xhr.onload();
       } else {
