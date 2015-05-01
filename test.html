@@ -163,10 +163,14 @@
         xhr.res = 'blob';
         xhr.open('GET', '4096x2048.mp4');
         xhr.onload = function () {
-          video.src = URL.createObjectURL(xhr.response);
-          var tapmsg = document.getElementById('tapmsg');
-          tapms.textContent = '画面をタップしてください';
-          document.addEventListener('click', mobilePlay, true);
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              video.src = URL.createObjectURL(xhr.response);
+              var tapmsg = document.getElementById('tapmsg');
+              tapms.textContent = '画面をタップしてください';
+              document.addEventListener('click', mobilePlay, true);
+            }
+          }
         }
         xhr.onprogress = function (e) {
           e.loaded / e.total;
