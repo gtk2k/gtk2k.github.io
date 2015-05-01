@@ -168,6 +168,7 @@
           tapms.textContent = '画面をタップしてください';
           document.addEventListener('click', mobilePlay, true);
         }
+        xhr.onload();
       } else {
         video.src = 'media/1920x960.mp4';
       }
