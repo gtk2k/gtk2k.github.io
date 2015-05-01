@@ -254,9 +254,9 @@
       video.play();
       // 再生した直後だとテクスチャーに表示されない場合があるため
       // 時間をおいてビューワーを生成する
-      //setTimeout(function () {
-      panoramaViewer();
-      //}, 1000);
+      setTimeout(function () {
+        panoramaViewer();
+      }, 10000);
     }
 
     if (deviceType == 'Mobile') {
