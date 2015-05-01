@@ -181,7 +181,7 @@
         xhr.onprogress = function (e) {
           prg.style.width = (e.loaded / e.total * 100) + 'px';
         }
-        xhr.onload();
+        xhr.send();
       } else {
         video.src = 'media/1920x960.mp4';
       }
