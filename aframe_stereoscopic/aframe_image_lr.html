@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>A-Frame test</title>
+  <script src="aframe-core.js"></script>
+</head>
+<body>
+  <a-assets>
+    <img id="image" src="./image/m_LR.png" />
+  </a-assets>
+  <a-scene>
+    <a-entity position="0 0 700">
+      <a-entity camera="fov: 45"></a-entity>
+    </a-entity>
+    <a-entity geometry="primitive: plane; width:655; height:496" material="src:#image; stereoscopicType:LR"></a-entity>
+  </a-scene>
+</body>
+</html>
