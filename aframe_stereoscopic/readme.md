@@ -1,4 +1,4 @@
-#A-Frame stereoscopic media source support demo pages.
+#A-Frame stereoscopic media source support test pages.
 Stereoscopic type  
 OU: Left eye:Over  / Right eye:Under.  
 UO: Left eye:Under / Right eye:Over.  
