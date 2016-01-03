@@ -18,7 +18,7 @@ RL: Left eye:Right / Right eye:Left.
 [Video 1920x2160 OU](https://gtk2k.github.io/aframe_stereoscopic/aframe_video_1920x2160_ou.html)  
 [Video 1920x2160 UO](https://gtk2k.github.io/aframe_stereoscopic/aframe_video_1920x2160_uo.html)  
 [Videosphere 1280x640 LR](https://gtk2k.github.io/aframe_stereoscopic/aframe_videosphere_1280x640_lr.html)  
-[Videosphere 1920x640 RL](https://gtk2k.github.io/aframe_stereoscopic/aframe_videosphere_1280x640_rl.html)  
+[Videosphere 1280x640 RL](https://gtk2k.github.io/aframe_stereoscopic/aframe_videosphere_1280x640_rl.html)  
 [Videosphere 1280x640 OU](https://gtk2k.github.io/aframe_stereoscopic/aframe_videosphere_1280x640_ou.html)  
 [Videosphere 1280x640 UO](https://gtk2k.github.io/aframe_stereoscopic/aframe_videosphere_1280x640_uo.html)  
 [Videosphere 1920x960 LR](https://gtk2k.github.io/aframe_stereoscopic/aframe_videosphere_1920x960_lr.html)  
