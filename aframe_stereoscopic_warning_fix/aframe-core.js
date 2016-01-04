@@ -58123,7 +58123,7 @@ function validateSrc (src, isImageCb, isVideoCb) {
   isImage = textureEl && textureEl.tagName === 'IMG';
   isVideo = textureEl && textureEl.tagName === 'VIDEO';
   if (isImage) {
-    if (textureEl.width) {
+    if (textureEl.complete) {
       return isImageCb(textureEl);
     } else {
       textureEl.onload = function () {
