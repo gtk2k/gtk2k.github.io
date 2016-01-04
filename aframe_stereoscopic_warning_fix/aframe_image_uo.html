@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>A-Frame test</title>
+  <script src="aframe-core.js"></script>
+</head>
+<body>
+  <a-assets>
+    <img id="image" src="../aframe_stereoscopic/image/d_UO.png" />
+  </a-assets>
+  <a-scene>
+    <a-entity position="0 0 900">
+      <a-entity camera="fov: 45"></a-entity>
+    </a-entity>
+    <a-entity geometry="primitive: plane; width:547; height:730" material="src:#image; stereoscopicType:UO"></a-entity>
+  </a-scene>
+</body>
+</html>
