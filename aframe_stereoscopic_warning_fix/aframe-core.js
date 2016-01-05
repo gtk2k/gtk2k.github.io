@@ -54070,6 +54070,7 @@ module.exports.Component = registerComponent('look-controls', {
 /* global Promise */
 var debug = require('../utils/debug');
 var diff = require('../utils').diff;
+var isMobile = require('../utils').isMobile;
 var registerComponent = require('../core/component').registerComponent;
 var srcLoader = require('../utils/src-loader');
 var THREE = require('../../lib/three');
@@ -54115,6 +54116,8 @@ var stereoscopicDirection = '';
  *         MeshBasicMaterial.
  * @param {string} src - To load a texture. takes a selector to an img/video
  *         element or a direct url().
+ * @param {string} msrc - To load a texture. takes a selector to an img/video
+ *         element or a direct url() for mobile.
  * @param {string} stereoscopicType - Stereoscopic texture type.
  *         'OU': Left eye:Over  / Right eye:Under.
  *         'UO': Left eye:Under / Right eye:Over.
@@ -54137,6 +54140,7 @@ module.exports.Component = registerComponent('material', {
     shader: { default: 'standard', oneOf: ['flat', 'standard'] },
     side: { default: 'front', oneOf: ['front', 'back', 'double'] },
     src: { default: '' },
+    msrc: { default: '' },
     stereoscopicType: { default: '' },
     transparent: { default: false },
     width: { default: 640 }
@@ -54161,7 +54165,7 @@ module.exports.Component = registerComponent('material', {
     var data = this.data;
     var material;
     var materialType = getMaterialType(data);
-    var src = data.src;
+    var src = isMobile() && data.msrc ? data.msrc : data.src;
 
     if (!oldData || getMaterialType(oldData) !== materialType) {
       material = this.createMaterial(getMaterialData(data), materialType);
@@ -56661,7 +56665,7 @@ var AScene = module.exports = registerElement('a-scene', {
     showOrientationModal: {
       value: function () {
         if (!utils.isIOS()) { return; }
-        if (!utils.isLandscape() && this.renderer === this.stereoscopicRenderer) {
+        if (!utils.isLandscape() && this.renderer === this.stereoRenderer) {
           this.orientationModal.classList.remove(HIDDEN_CLASS);
         } else {
           this.orientationModal.classList.add(HIDDEN_CLASS);
@@ -56949,13 +56953,22 @@ var AScene = module.exports = registerElement('a-scene', {
 
     setupCanvas: {
       value: function () {
-        var canvas = this.canvas = document.createElement('canvas');
+        var canvasSelector = this.getAttribute('canvas');
+        var canvas;
+
+        if (canvasSelector) {
+          canvas = this.canvas = document.querySelector(canvasSelector);
+        } else {
+          canvas = this.canvas = document.createElement('canvas');
+          this.appendChild(canvas);
+        }
+
         canvas.classList.add('a-canvas');
         // Prevents overscroll on mobile devices.
         canvas.addEventListener('touchmove', function (evt) {
           evt.preventDefault();
         });
-        document.body.appendChild(canvas);
+
         window.addEventListener('resize', this.resizeCanvas.bind(this), false);
       }
     },
