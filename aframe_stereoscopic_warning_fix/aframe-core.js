@@ -15,7 +15,7 @@ THREE.VREffect = function (renderer, onError, leftPreprocess, rightPreprocess) {
   var eyeTranslationL, eyeFOVL;
   var eyeTranslationR, eyeFOVR;
 
-  function gotVRDevices(devices) {
+  function gotVRDevices (devices) {
     for (var i = 0; i < devices.length; i++) {
       if (devices[i] instanceof HMDVRDevice) {
         vrHMD = devices[i];
@@ -130,7 +130,7 @@ THREE.VREffect = function (renderer, onError, leftPreprocess, rightPreprocess) {
 
   //
 
-  function fovToNDCScaleOffset(fov) {
+  function fovToNDCScaleOffset (fov) {
     var pxscale = 2.0 / (fov.leftTan + fov.rightTan);
     var pxoffset = (fov.leftTan - fov.rightTan) * pxscale * 0.5;
     var pyscale = 2.0 / (fov.upTan + fov.downTan);
@@ -141,7 +141,7 @@ THREE.VREffect = function (renderer, onError, leftPreprocess, rightPreprocess) {
     };
   }
 
-  function fovPortToProjection(fov, rightHanded, zNear, zFar) {
+  function fovPortToProjection (fov, rightHanded, zNear, zFar) {
     rightHanded = rightHanded === undefined ? true : rightHanded;
     zNear = zNear === undefined ? 0.01 : zNear;
     zFar = zFar === undefined ? 10000.0 : zFar;
@@ -186,7 +186,7 @@ THREE.VREffect = function (renderer, onError, leftPreprocess, rightPreprocess) {
     return mobj;
   }
 
-  function fovToProjection(fov, rightHanded, zNear, zFar) {
+  function fovToProjection (fov, rightHanded, zNear, zFar) {
     var DEG2RAD = Math.PI / 180.0;
     var fovPort = {
       upTan: Math.tan(fov.upDegrees * DEG2RAD),
@@ -54116,8 +54116,7 @@ var stereoscopicDirection = '';
  *         MeshBasicMaterial.
  * @param {string} src - To load a texture. takes a selector to an img/video
  *         element or a direct url().
- * @param {string} msrc - To load a texture. takes a selector to an img/video
- *         element or a direct url() for mobile.
+ * @param {string} msrc - src for mobile.
  * @param {string} stereoscopicType - Stereoscopic texture type.
  *         'OU': Left eye:Over  / Right eye:Under.
  *         'UO': Left eye:Under / Right eye:Over.
@@ -54247,7 +54246,7 @@ module.exports.Component = registerComponent('material', {
     } else {
       // Material is first to load this texture. Load and resolve texture.
       texturePromises[envMap] = new Promise(function (resolve) {
-        srcLoader.validateCubemapSrc(envMap, function loadEnvMap(urls) {
+        srcLoader.validateCubemapSrc(envMap, function loadEnvMap (urls) {
           CubeLoader.load(urls, function (cube) {
             // Texture loaded.
             self.isLoadingEnvMap = false;
@@ -54294,8 +54293,8 @@ module.exports.Component = registerComponent('material', {
       material.map = null;
       material.needsUpdate = true;
     }
-    function loadImage(src) { loadImageTexture(material, src, data.repeat, loadedStereoscopicTexture); }
-    function loadVideo(src) { loadVideoTexture(material, src, data.width, data.height, loadedStereoscopicTexture); }
+    function loadImage (src) { loadImageTexture(material, src, data.repeat, loadedStereoscopicTexture); }
+    function loadVideo (src) { loadVideoTexture(material, src, data.width, data.height, loadedStereoscopicTexture); }
   }
 });
 
@@ -54307,11 +54306,11 @@ module.exports.Component = registerComponent('material', {
  * @param {string} repeat - X and Y value for size of texture repeating (in UV units).
  * @param {function} loadedStereoscopicTexture - Stereoscopic texture loaded callback.
  */
-function loadImageTexture(material, src, repeat, loadedStereoscopicTexture) {
+function loadImageTexture (material, src, repeat, loadedStereoscopicTexture) {
   var isEl = typeof src !== 'string';
 
   var onLoad = createTexture;
-  var onProgress = function () { };
+  var onProgress = function () {};
   var onError = function (xhr) {
     error('The URL "$s" could not be fetched (Error code: %s; Response: %s)',
           xhr.status, xhr.statusText);
@@ -54323,7 +54322,7 @@ function loadImageTexture(material, src, repeat, loadedStereoscopicTexture) {
     TextureLoader.load(src, onLoad, onProgress, onError);
   }
 
-  function createTexture(texture) {
+  function createTexture (texture) {
     if (!(texture instanceof THREE.Texture)) { texture = new THREE.Texture(texture); }
     var repeatXY;
     if (repeat) {
@@ -54351,9 +54350,9 @@ function loadImageTexture(material, src, repeat, loadedStereoscopicTexture) {
  * @param {number} height - Height of the video.
  * @returns {Element} Video element.
  */
-function createVideoEl(material, src, width, height) {
+function createVideoEl (material, src, width, height) {
   var el = material.videoEl || document.createElement('video');
-  function onError() {
+  function onError () {
     warn('The URL "$s" is not a valid image or video', src);
   }
   el.width = width;
@@ -54379,7 +54378,7 @@ function createVideoEl(material, src, width, height) {
  * @param {number} height - Height of the video.
  * @param {function} loadedStereoscopicTexture - Stereoscopic texture loaded callback.
 */
-function loadVideoTexture(material, src, height, width, loadedStereoscopicTexture) {
+function loadVideoTexture (material, src, height, width, loadedStereoscopicTexture) {
   // three.js video texture loader requires a <video>.
   var videoEl = typeof src !== 'string' ? fixVideoAttributes(src) : createVideoEl(material, src, height, width);
   var loaded = function () {
@@ -54405,7 +54404,7 @@ function loadVideoTexture(material, src, height, width, loadedStereoscopicTextur
  * @param {Element} videoEl - Video element.
  * @returns {Element} Video element with the correct properties updated.
  */
-function fixVideoAttributes(videoEl) {
+function fixVideoAttributes (videoEl) {
   // The `<video>` element treats `loop` and `muted` as boolean attributes, but
   // of course does not with `autoplay`, `controls`, `preload` (and `crossorigin`).
   // If we get passed a `<video autoplay="false">`, let's assume the dev wanted
@@ -54424,7 +54423,7 @@ function fixVideoAttributes(videoEl) {
  * @param {object} data - Material data.
  * @returns {object} data - Processed material data.
  */
-function getMaterialData(data) {
+function getMaterialData (data) {
   var materialData = {
     color: data.color,
     side: data.side,
@@ -54445,7 +54444,7 @@ function getMaterialData(data) {
  * @param {object} data - Material data.
  * @returns {object} Processed material data.
  */
-function processMaterialData(data) {
+function processMaterialData (data) {
   if ('color' in data) {
     data.color = new THREE.Color(data.color);
   }
@@ -54464,7 +54463,7 @@ function processMaterialData(data) {
  * @param {object} Material component data.
  * @returns {string} Material type (as three.js constructor name)
  */
-function getMaterialType(data) {
+function getMaterialType (data) {
   return data.shader === 'flat' ? MATERIAL_TYPE_BASIC : MATERIAL_TYPE_STANDARD;
 }
 
@@ -54475,7 +54474,7 @@ function getMaterialType(data) {
  * @param {string} [side=front] - `front`, `back`, or `double`.
  * @returns {number} THREE.FrontSide, THREE.BackSide, or THREE.DoubleSide.
  */
-function getSide(side) {
+function getSide (side) {
   switch (side) {
     case 'back': {
       return THREE.BackSide;
@@ -56679,7 +56678,7 @@ var AScene = module.exports = registerElement('a-scene', {
      */
     attachFullscreenListeners: {
       value: function () {
-        function fullscreenChange(e) {
+        function fullscreenChange (e) {
           var fsElement = document.fullscreenElement ||
                           document.mozFullScreenElement ||
                           document.webkitFullscreenElement;
@@ -56989,7 +56988,7 @@ var AScene = module.exports = registerElement('a-scene', {
 
         // DOM calls to create camera.
         cameraWrapperEl = document.createElement('a-entity');
-        cameraWrapperEl.setAttribute('position', { x: 0, y: 1.8, z: 4 });
+        cameraWrapperEl.setAttribute('position', {x: 0, y: 1.8, z: 4});
         cameraWrapperEl.setAttribute(DEFAULT_CAMERA_ATTR, '');
         defaultCamera = document.createElement('a-entity');
         defaultCamera.setAttribute('camera');
@@ -57010,7 +57009,7 @@ var AScene = module.exports = registerElement('a-scene', {
       value: function () {
         var ambientLight = document.createElement('a-entity');
         ambientLight.setAttribute('light',
-                                  { color: '#fff', type: 'ambient' });
+                                  {color: '#fff', type: 'ambient'});
         ambientLight.setAttribute(DEFAULT_LIGHT_ATTR, '');
         this.appendChild(ambientLight);
 
@@ -57079,7 +57078,7 @@ var AScene = module.exports = registerElement('a-scene', {
             } else {
               self.setMonoRenderer();
             }
-            window.top.postMessage({ type: 'ready' }, '*');
+            window.top.postMessage({type: 'ready'}, '*');
           });
         }
         if (!self.insideLoader) {
@@ -57130,7 +57129,7 @@ var AScene = module.exports = registerElement('a-scene', {
             fps: { caption: 'fps', below: 30 }
           },
           groups: [
-            { caption: 'Framerate', values: ['fps', 'raf'] }
+            { caption: 'Framerate', values: [ 'fps', 'raf' ] }
           ]
         });
         this.statsEl = document.querySelector('.rs-base');
@@ -57171,7 +57170,7 @@ var AScene = module.exports = registerElement('a-scene', {
 
           startRender();
 
-          function startRender() {
+          function startRender () {
             // Kick off render loop.
             self.render();
             self.renderStarted = true;
@@ -57217,7 +57216,7 @@ var AScene = module.exports = registerElement('a-scene', {
       value: function () {
         return new Promise(function (resolve) {
           var channel = new MessageChannel();
-          window.top.postMessage({ type: 'checkVr' }, '*', [channel.port2]);
+          window.top.postMessage({type: 'checkVr'}, '*', [channel.port2]);
           channel.port1.onmessage = function (message) {
             resolve(!!message.data.data.isVr);
           };
@@ -57294,7 +57293,7 @@ var AScene = module.exports = registerElement('a-scene', {
  *
  * @returns {Element} Wrapper <div>.
  */
-function createEnterVR(enterVRHandler) {
+function createEnterVR (enterVRHandler) {
   var compatModal;
   var compatModalLink;
   var compatModalText;
@@ -57342,7 +57341,7 @@ function createEnterVR(enterVRHandler) {
   /**
    * Check for headset connection by looking at orientation {0 0 0}.
    */
-  function checkHeadsetConnected() {
+  function checkHeadsetConnected () {
     controls.update();
     orientation = dummyDolly.quaternion;
     if (orientation._x !== 0 || orientation._y !== 0 || orientation._z !== 0) {
@@ -57362,7 +57361,7 @@ function createEnterVR(enterVRHandler) {
  *
  * @type {Object}
  */
-function injectMetaTags() {
+function injectMetaTags () {
   var headEl;
   var meta = document.querySelector('meta[name="viewport"]');
   if (meta) { return; }  // Already exists.
@@ -58142,7 +58141,7 @@ function validateSrc (src, isImageCb, isVideoCb) {
       textureEl.onload = function () {
         textureEl.onload = null;
         return isImageCb(textureEl);
-      }
+      };
     }
   } else if (isVideo) {
     if (textureEl.videoWidth) {
@@ -58151,7 +58150,7 @@ function validateSrc (src, isImageCb, isVideoCb) {
       textureEl.onloadedmetadata = function () {
         textureEl.onloadedmetadata = null;
         return isVideoCb(textureEl);
-      }
+      };
     }
   } else {
     // src is a valid selector but doesn't match with a <img> or <video> element.
