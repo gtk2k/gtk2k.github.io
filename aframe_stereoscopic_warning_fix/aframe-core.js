@@ -54382,6 +54382,7 @@ function loadVideoTexture (material, src, height, width, loadedStereoscopicTextu
   // three.js video texture loader requires a <video>.
   var videoEl = typeof src !== 'string' ? fixVideoAttributes(src) : createVideoEl(material, src, height, width);
   var loaded = function () {
+    videoEl.onloadeddata = null;
     var texture = new THREE.VideoTexture(videoEl);
     texture.minFilter = THREE.LinearFilter;
     texture.needsUpdate = true;
@@ -54392,7 +54393,7 @@ function loadVideoTexture (material, src, height, width, loadedStereoscopicTextu
   if (videoEl.videoWidth) {
     loaded();
   } else {
-    videoEl.onloadedmetadata = loaded;
+    videoEl.onloadeddata = loaded;
   }
 }
 
@@ -58147,8 +58148,8 @@ function validateSrc (src, isImageCb, isVideoCb) {
     if (textureEl.videoWidth) {
       return isVideoCb(textureEl);
     } else {
-      textureEl.onloadedmetadata = function () {
-        textureEl.onloadedmetadata = null;
+      textureEl.onloadeddata = function () {
+        textureEl.onloadeddata = null;
         return isVideoCb(textureEl);
       };
     }
