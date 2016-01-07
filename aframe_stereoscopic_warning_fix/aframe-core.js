@@ -1,205 +1,4 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.aframeCore = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/**
- * @author dmarcos / https://github.com/dmarcos
- * @author mrdoob / http://mrdoob.com
- *
- * WebVR Spec: http://mozvr.github.io/webvr-spec/webvr.html
- *
- * Firefox: http://mozvr.com/downloads/
- * Chromium: https://drive.google.com/folderview?id=0BzudLt22BqGRbW9WTHMtOWMzNjQ&usp=sharing#list
- *
- */
-
-THREE.VREffect = function (renderer, onError, leftPreprocess, rightPreprocess) {
-  var vrHMD;
-  var eyeTranslationL, eyeFOVL;
-  var eyeTranslationR, eyeFOVR;
-
-  function gotVRDevices (devices) {
-    for (var i = 0; i < devices.length; i++) {
-      if (devices[i] instanceof HMDVRDevice) {
-        vrHMD = devices[i];
-        break; // We keep the first we encounter
-      }
-    }
-
-    if (vrHMD === undefined) {
-      if (onError) onError('HMD not available');
-    }
-  }
-
-  if (navigator.getVRDevices) {
-    navigator.getVRDevices().then(gotVRDevices);
-  }
-
-  //
-
-  this.scale = 1;
-
-  this.setSize = function (width, height) {
-    renderer.setSize(width, height);
-  };
-
-  // fullscreen
-
-  var isFullscreen = false;
-
-  var canvas = renderer.domElement;
-  var fullscreenchange = canvas.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange';
-
-  document.addEventListener(fullscreenchange, function (event) {
-    isFullscreen = document.mozFullScreenElement || document.webkitFullscreenElement;
-  }, false);
-
-  this.setFullScreen = function (boolean) {
-    if (vrHMD === undefined) return;
-    if (isFullscreen === boolean) return;
-
-    if (canvas.mozRequestFullScreen) {
-      canvas.mozRequestFullScreen({
-        vrDisplay: vrHMD
-      });
-    } else if (canvas.webkitRequestFullscreen) {
-      canvas.webkitRequestFullscreen({
-        vrDisplay: vrHMD
-      });
-    }
-  };
-
-  // render
-
-  var cameraL = new THREE.PerspectiveCamera();
-  cameraL.layers.enable(1);
-
-  var cameraR = new THREE.PerspectiveCamera();
-  cameraR.layers.enable(2);
-
-  this.render = function (scene, camera) {
-    if (vrHMD) {
-      var eyeParamsL = vrHMD.getEyeParameters('left');
-      var eyeParamsR = vrHMD.getEyeParameters('right');
-
-      eyeTranslationL = eyeParamsL.eyeTranslation;
-      eyeTranslationR = eyeParamsR.eyeTranslation;
-      eyeFOVL = eyeParamsL.recommendedFieldOfView; 
-      eyeFOVR = eyeParamsR.recommendedFieldOfView;
-
-      if (Array.isArray(scene)) {
-        console.warn('THREE.VREffect.render() no longer supports arrays. Use object.layers instead.');
-        scene = scene[0];
-      }
-
-      var size = renderer.getSize();
-      size.width /= 2;
-
-      renderer.setScissorTest(true);
-      renderer.clear();
-
-      if (camera.parent === null) camera.updateMatrixWorld();
-
-      cameraL.projectionMatrix = fovToProjection(eyeFOVL, true, camera.near, camera.far);
-      cameraR.projectionMatrix = fovToProjection(eyeFOVR, true, camera.near, camera.far);
-
-      camera.matrixWorld.decompose(cameraL.position, cameraL.quaternion, cameraL.scale);
-      camera.matrixWorld.decompose(cameraR.position, cameraR.quaternion, cameraR.scale);
-
-      cameraL.translateX(eyeTranslationL.x * this.scale);
-      cameraR.translateX(eyeTranslationR.x * this.scale);
-
-      // render left eye
-      leftPreprocess && leftPreprocess();
-      renderer.setViewport(0, 0, size.width, size.height);
-      renderer.setScissor(0, 0, size.width, size.height);
-      renderer.render(scene, cameraL);
-
-      // render right eye
-      rightPreprocess && rightPreprocess();
-      renderer.setViewport(size.width, 0, size.width, size.height);
-      renderer.setScissor(size.width, 0, size.width, size.height);
-      renderer.render(scene, cameraR);
-
-      renderer.setScissorTest(false);
-
-      return;
-    }
-
-    // Regular render mode if not HMD
-
-    renderer.render(scene, camera);
-  };
-
-  //
-
-  function fovToNDCScaleOffset (fov) {
-    var pxscale = 2.0 / (fov.leftTan + fov.rightTan);
-    var pxoffset = (fov.leftTan - fov.rightTan) * pxscale * 0.5;
-    var pyscale = 2.0 / (fov.upTan + fov.downTan);
-    var pyoffset = (fov.upTan - fov.downTan) * pyscale * 0.5;
-    return {
-      scale: [pxscale, pyscale],
-      offset: [pxoffset, pyoffset]
-    };
-  }
-
-  function fovPortToProjection (fov, rightHanded, zNear, zFar) {
-    rightHanded = rightHanded === undefined ? true : rightHanded;
-    zNear = zNear === undefined ? 0.01 : zNear;
-    zFar = zFar === undefined ? 10000.0 : zFar;
-
-    var handednessScale = rightHanded ? -1.0 : 1.0;
-
-    // start with an identity matrix
-    var mobj = new THREE.Matrix4();
-    var m = mobj.elements;
-
-    // and with scale/offset info for normalized device coords
-    var scaleAndOffset = fovToNDCScaleOffset(fov);
-
-    // X result, map clip edges to [-w,+w]
-    m[0 * 4 + 0] = scaleAndOffset.scale[0];
-    m[0 * 4 + 1] = 0.0;
-    m[0 * 4 + 2] = scaleAndOffset.offset[0] * handednessScale;
-    m[0 * 4 + 3] = 0.0;
-
-    // Y result, map clip edges to [-w,+w]
-    // Y offset is negated because this proj matrix transforms from world coords with Y=up,
-    // but the NDC scaling has Y=down (thanks D3D?)
-    m[1 * 4 + 0] = 0.0;
-    m[1 * 4 + 1] = scaleAndOffset.scale[1];
-    m[1 * 4 + 2] = -scaleAndOffset.offset[1] * handednessScale;
-    m[1 * 4 + 3] = 0.0;
-
-    // Z result (up to the app)
-    m[2 * 4 + 0] = 0.0;
-    m[2 * 4 + 1] = 0.0;
-    m[2 * 4 + 2] = zFar / (zNear - zFar) * -handednessScale;
-    m[2 * 4 + 3] = (zFar * zNear) / (zNear - zFar);
-
-    // W result (= Z in)
-    m[3 * 4 + 0] = 0.0;
-    m[3 * 4 + 1] = 0.0;
-    m[3 * 4 + 2] = handednessScale;
-    m[3 * 4 + 3] = 0.0;
-
-    mobj.transpose();
-
-    return mobj;
-  }
-
-  function fovToProjection (fov, rightHanded, zNear, zFar) {
-    var DEG2RAD = Math.PI / 180.0;
-    var fovPort = {
-      upTan: Math.tan(fov.upDegrees * DEG2RAD),
-      downTan: Math.tan(fov.downDegrees * DEG2RAD),
-      leftTan: Math.tan(fov.leftDegrees * DEG2RAD),
-      rightTan: Math.tan(fov.rightDegrees * DEG2RAD)
-    };
-
-    return fovPortToProjection(fovPort, rightHanded, zNear, zFar);
-  }
-};
-
-},{}],2:[function(require,module,exports){
 (function (global){
 var THREE = global.THREE = require('three-dev');
 
@@ -214,13 +13,13 @@ require('../node_modules/three-dev/examples/js/loaders/OBJLoader');  // THREE.OB
 require('../node_modules/three-dev/examples/js/loaders/ColladaLoader');  // THREE.ColladaLoader
 require('../lib/vendor/Raycaster');  // THREE.Raycaster
 require('../node_modules/three-dev/examples/js/controls/VRControls');  // THREE.VRControls
-require('./VREffect');  // THREE.VREffect
+require('../node_modules/three-dev/examples/js/effects/VREffect');  // THREE.VREffect
 
 module.exports = THREE;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../lib/vendor/Raycaster":3,"../node_modules/three-dev/examples/js/controls/VRControls":21,"../node_modules/three-dev/examples/js/loaders/ColladaLoader":22,"../node_modules/three-dev/examples/js/loaders/OBJLoader":23,"./VREffect":1,"three-dev":20}],3:[function(require,module,exports){
+},{"../lib/vendor/Raycaster":2,"../node_modules/three-dev/examples/js/controls/VRControls":20,"../node_modules/three-dev/examples/js/effects/VREffect":21,"../node_modules/three-dev/examples/js/loaders/ColladaLoader":22,"../node_modules/three-dev/examples/js/loaders/OBJLoader":23,"three-dev":19}],2:[function(require,module,exports){
 /**
  * @author mrdoob / http://mrdoob.com/
  * @author bhouston / http://clara.io/
@@ -357,7 +156,7 @@ module.exports = THREE;
 
 }( THREE ) );
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 // performance.now() polyfill from https://gist.github.com/paulirish/5438650
 
 (function(){
@@ -785,7 +584,7 @@ var rStats = function rStats( settings ) {
 };
 
 if (typeof module !== "undefined") { module.exports = rStats; }
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -847,7 +646,7 @@ Util.isLandscapeMode = function() {
 
 module.exports = Util;
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -923,7 +722,7 @@ function getWakeLock() {
 
 module.exports = getWakeLock();
 
-},{"./util.js":5}],7:[function(require,module,exports){
+},{"./util.js":4}],6:[function(require,module,exports){
 'use strict';
 // For more information about browser field, check out the browser field at https://github.com/substack/browserify-handbook#browser-field.
 
@@ -975,7 +774,7 @@ module.exports = {
     }
 };
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1068,7 +867,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -1238,7 +1037,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":10}],10:[function(require,module,exports){
+},{"./debug":9}],9:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1437,7 +1236,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":11}],11:[function(require,module,exports){
+},{"ms":10}],10:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -1564,10 +1363,10 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*! (C) WebReflection Mit Style License */
 (function(e,t,n,r){"use strict";function rt(e,t){for(var n=0,r=e.length;n<r;n++)vt(e[n],t)}function it(e){for(var t=0,n=e.length,r;t<n;t++)r=e[t],nt(r,b[ot(r)])}function st(e){return function(t){j(t)&&(vt(t,e),rt(t.querySelectorAll(w),e))}}function ot(e){var t=e.getAttribute("is"),n=e.nodeName.toUpperCase(),r=S.call(y,t?v+t.toUpperCase():d+n);return t&&-1<r&&!ut(n,t)?-1:r}function ut(e,t){return-1<w.indexOf(e+'[is="'+t+'"]')}function at(e){var t=e.currentTarget,n=e.attrChange,r=e.attrName,i=e.target;Q&&(!i||i===t)&&t.attributeChangedCallback&&r!=="style"&e.prevValue!==e.newValue&&t.attributeChangedCallback(r,n===e[a]?null:e.prevValue,n===e[l]?null:e.newValue)}function ft(e){var t=st(e);return function(e){X.push(t,e.target)}}function lt(e){K&&(K=!1,e.currentTarget.removeEventListener(h,lt)),rt((e.target||t).querySelectorAll(w),e.detail===o?o:s),B&&pt()}function ct(e,t){var n=this;q.call(n,e,t),G.call(n,{target:n})}function ht(e,t){D(e,t),et?et.observe(e,z):(J&&(e.setAttribute=ct,e[i]=Z(e),e.addEventListener(p,G)),e.addEventListener(c,at)),e.createdCallback&&Q&&(e.created=!0,e.createdCallback(),e.created=!1)}function pt(){for(var e,t=0,n=F.length;t<n;t++)e=F[t],E.contains(e)||(n--,F.splice(t--,1),vt(e,o))}function dt(e){throw new Error("A "+e+" type is already registered")}function vt(e,t){var n,r=ot(e);-1<r&&(tt(e,b[r]),r=0,t===s&&!e[s]?(e[o]=!1,e[s]=!0,r=1,B&&S.call(F,e)<0&&F.push(e)):t===o&&!e[o]&&(e[s]=!1,e[o]=!0,r=1),r&&(n=e[t+"Callback"])&&n.call(e))}if(r in t)return;var i="__"+r+(Math.random()*1e5>>0),s="attached",o="detached",u="extends",a="ADDITION",f="MODIFICATION",l="REMOVAL",c="DOMAttrModified",h="DOMContentLoaded",p="DOMSubtreeModified",d="<",v="=",m=/^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$/,g=["ANNOTATION-XML","COLOR-PROFILE","FONT-FACE","FONT-FACE-SRC","FONT-FACE-URI","FONT-FACE-FORMAT","FONT-FACE-NAME","MISSING-GLYPH"],y=[],b=[],w="",E=t.documentElement,S=y.indexOf||function(e){for(var t=this.length;t--&&this[t]!==e;);return t},x=n.prototype,T=x.hasOwnProperty,N=x.isPrototypeOf,C=n.defineProperty,k=n.getOwnPropertyDescriptor,L=n.getOwnPropertyNames,A=n.getPrototypeOf,O=n.setPrototypeOf,M=!!n.__proto__,_=n.create||function mt(e){return e?(mt.prototype=e,new mt):this},D=O||(M?function(e,t){return e.__proto__=t,e}:L&&k?function(){function e(e,t){for(var n,r=L(t),i=0,s=r.length;i<s;i++)n=r[i],T.call(e,n)||C(e,n,k(t,n))}return function(t,n){do e(t,n);while((n=A(n))&&!N.call(n,t));return t}}():function(e,t){for(var n in t)e[n]=t[n];return e}),P=e.MutationObserver||e.WebKitMutationObserver,H=(e.HTMLElement||e.Element||e.Node).prototype,B=!N.call(H,E),j=B?function(e){return e.nodeType===1}:function(e){return N.call(H,e)},F=B&&[],I=H.cloneNode,q=H.setAttribute,R=H.removeAttribute,U=t.createElement,z=P&&{attributes:!0,characterData:!0,attributeOldValue:!0},W=P||function(e){J=!1,E.removeEventListener(c,W)},X,V=e.requestAnimationFrame||e.webkitRequestAnimationFrame||e.mozRequestAnimationFrame||e.msRequestAnimationFrame||function(e){setTimeout(e,10)},$=!1,J=!0,K=!0,Q=!0,G,Y,Z,et,tt,nt;O||M?(tt=function(e,t){N.call(t,e)||ht(e,t)},nt=ht):(tt=function(e,t){e[i]||(e[i]=n(!0),ht(e,t))},nt=tt),B?(J=!1,function(){var e=k(H,"addEventListener"),t=e.value,n=function(e){var t=new CustomEvent(c,{bubbles:!0});t.attrName=e,t.prevValue=this.getAttribute(e),t.newValue=null,t[l]=t.attrChange=2,R.call(this,e),this.dispatchEvent(t)},r=function(e,t){var n=this.hasAttribute(e),r=n&&this.getAttribute(e),i=new CustomEvent(c,{bubbles:!0});q.call(this,e,t),i.attrName=e,i.prevValue=n?r:null,i.newValue=t,n?i[f]=i.attrChange=1:i[a]=i.attrChange=0,this.dispatchEvent(i)},s=function(e){var t=e.currentTarget,n=t[i],r=e.propertyName,s;n.hasOwnProperty(r)&&(n=n[r],s=new CustomEvent(c,{bubbles:!0}),s.attrName=n.name,s.prevValue=n.value||null,s.newValue=n.value=t[r]||null,s.prevValue==null?s[a]=s.attrChange=0:s[f]=s.attrChange=1,t.dispatchEvent(s))};e.value=function(e,o,u){e===c&&this.attributeChangedCallback&&this.setAttribute!==r&&(this[i]={className:{name:"class",value:this.className}},this.setAttribute=r,this.removeAttribute=n,t.call(this,"propertychange",s)),t.call(this,e,o,u)},C(H,"addEventListener",e)}()):P||(E.addEventListener(c,W),E.setAttribute(i,1),E.removeAttribute(i),J&&(G=function(e){var t=this,n,r,s;if(t===e.target){n=t[i],t[i]=r=Z(t);for(s in r){if(!(s in n))return Y(0,t,s,n[s],r[s],a);if(r[s]!==n[s])return Y(1,t,s,n[s],r[s],f)}for(s in n)if(!(s in r))return Y(2,t,s,n[s],r[s],l)}},Y=function(e,t,n,r,i,s){var o={attrChange:e,currentTarget:t,attrName:n,prevValue:r,newValue:i};o[s]=e,at(o)},Z=function(e){for(var t,n,r={},i=e.attributes,s=0,o=i.length;s<o;s++)t=i[s],n=t.name,n!=="setAttribute"&&(r[n]=t.value);return r})),t[r]=function(n,r){c=n.toUpperCase(),$||($=!0,P?(et=function(e,t){function n(e,t){for(var n=0,r=e.length;n<r;t(e[n++]));}return new P(function(r){for(var i,s,o,u=0,a=r.length;u<a;u++)i=r[u],i.type==="childList"?(n(i.addedNodes,e),n(i.removedNodes,t)):(s=i.target,Q&&s.attributeChangedCallback&&i.attributeName!=="style"&&(o=s.getAttribute(i.attributeName),o!==i.oldValue&&s.attributeChangedCallback(i.attributeName,i.oldValue,o)))})}(st(s),st(o)),et.observe(t,{childList:!0,subtree:!0})):(X=[],V(function E(){while(X.length)X.shift().call(null,X.shift());V(E)}),t.addEventListener("DOMNodeInserted",ft(s)),t.addEventListener("DOMNodeRemoved",ft(o))),t.addEventListener(h,lt),t.addEventListener("readystatechange",lt),t.createElement=function(e,n){var r=U.apply(t,arguments),i=""+e,s=S.call(y,(n?v:d)+(n||i).toUpperCase()),o=-1<s;return n&&(r.setAttribute("is",n=n.toLowerCase()),o&&(o=ut(i.toUpperCase(),n))),Q=!t.createElement.innerHTMLHelper,o&&nt(r,b[s]),r},H.cloneNode=function(e){var t=I.call(this,!!e),n=ot(t);return-1<n&&nt(t,b[n]),e&&it(t.querySelectorAll(w)),t}),-2<S.call(y,v+c)+S.call(y,d+c)&&dt(n);if(!m.test(c)||-1<S.call(g,c))throw new Error("The type "+n+" is invalid");var i=function(){return f?t.createElement(l,c):t.createElement(l)},a=r||x,f=T.call(a,u),l=f?r[u].toUpperCase():c,c,p;return f&&-1<S.call(y,d+l)&&dt(l),p=y.push((f?v:d)+c)-1,w=w.concat(w.length?",":"",f?l+'[is="'+n.toLowerCase()+'"]':l),i.prototype=b[p]=T.call(a,"prototype")?a.prototype:_(H),rt(t.querySelectorAll(w),s),i}})(window,document,Object,"registerElement");
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -2539,7 +2338,7 @@ function plural(ms, n, name) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"_process":8}],14:[function(require,module,exports){
+},{"_process":7}],13:[function(require,module,exports){
 /* eslint-disable no-unused-vars */
 'use strict';
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -2580,7 +2379,7 @@ module.exports = Object.assign || function (target, source) {
 	return to;
 };
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (global){
 var performance = global.performance || {};
 
@@ -2613,7 +2412,7 @@ module.exports = present;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var raf = require('raf');
@@ -2643,7 +2442,7 @@ function clearInterval(data) {
   raf.cancel(data.id);
 }
 
-},{"raf":17,"time-now":18}],17:[function(require,module,exports){
+},{"raf":16,"time-now":17}],16:[function(require,module,exports){
 /**
  * Expose `requestAnimationFrame()`.
  */
@@ -2679,7 +2478,7 @@ exports.cancel = function(id){
   cancel.call(window, id);
 };
 
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 module.exports = (function() {
@@ -2693,7 +2492,7 @@ module.exports = (function() {
   }
 }());
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /*
 
 style-attr
@@ -2767,7 +2566,7 @@ module.exports.parse = parse;
 module.exports.stringify = stringify;
 module.exports.normalize = normalize;
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 // File:src/Three.js
 
 /**
@@ -42953,7 +42752,7 @@ THREE.MorphBlendMesh.prototype.update = function ( delta ) {
 };
 
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /**
  * @author dmarcos / https://github.com/dmarcos
  * @author mrdoob / http://mrdoob.com
@@ -43077,6 +42876,234 @@ THREE.VRControls = function ( object, onError ) {
 		vrInputs = [];
 
 	};
+
+};
+
+},{}],21:[function(require,module,exports){
+/**
+ * @author dmarcos / https://github.com/dmarcos
+ * @author mrdoob / http://mrdoob.com
+ *
+ * WebVR Spec: http://mozvr.github.io/webvr-spec/webvr.html
+ *
+ * Firefox: http://mozvr.com/downloads/
+ * Chromium: https://drive.google.com/folderview?id=0BzudLt22BqGRbW9WTHMtOWMzNjQ&usp=sharing#list
+ *
+ */
+
+THREE.VREffect = function ( renderer, onError ) {
+
+	var vrHMD;
+	var eyeTranslationL, eyeFOVL;
+	var eyeTranslationR, eyeFOVR;
+
+	function gotVRDevices( devices ) {
+
+		for ( var i = 0; i < devices.length; i ++ ) {
+
+			if ( devices[ i ] instanceof HMDVRDevice ) {
+
+				vrHMD = devices[ i ];
+
+				break; // We keep the first we encounter
+
+			}
+
+		}
+
+		if ( vrHMD === undefined ) {
+
+			if ( onError ) onError( 'HMD not available' );
+
+		}
+
+	}
+
+	if ( navigator.getVRDevices ) {
+
+		navigator.getVRDevices().then( gotVRDevices );
+
+	}
+
+	//
+
+	this.scale = 1;
+
+	this.setSize = function( width, height ) {
+
+		renderer.setSize( width, height );
+
+	};
+
+	// fullscreen
+
+	var isFullscreen = false;
+
+	var canvas = renderer.domElement;
+	var fullscreenchange = canvas.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange';
+
+	document.addEventListener( fullscreenchange, function ( event ) {
+
+		isFullscreen = document.mozFullScreenElement || document.webkitFullscreenElement;
+
+	}, false );
+
+	this.setFullScreen = function ( boolean ) {
+
+		if ( vrHMD === undefined ) return;
+		if ( isFullscreen === boolean ) return;
+
+		if ( canvas.mozRequestFullScreen ) {
+
+			canvas.mozRequestFullScreen( { vrDisplay: vrHMD } );
+
+		} else if ( canvas.webkitRequestFullscreen ) {
+
+			canvas.webkitRequestFullscreen( { vrDisplay: vrHMD } );
+
+		}
+
+	};
+
+	// render
+
+	var cameraL = new THREE.PerspectiveCamera();
+	cameraL.layers.enable( 1 );
+
+	var cameraR = new THREE.PerspectiveCamera();
+	cameraR.layers.enable( 2 );
+
+	this.render = function ( scene, camera ) {
+
+		if ( vrHMD ) {
+
+			var eyeParamsL = vrHMD.getEyeParameters( 'left' );
+			var eyeParamsR = vrHMD.getEyeParameters( 'right' );
+
+			eyeTranslationL = eyeParamsL.eyeTranslation;
+			eyeTranslationR = eyeParamsR.eyeTranslation;
+			eyeFOVL = eyeParamsL.recommendedFieldOfView;
+			eyeFOVR = eyeParamsR.recommendedFieldOfView;
+
+			if ( Array.isArray( scene ) ) {
+
+				console.warn( 'THREE.VREffect.render() no longer supports arrays. Use object.layers instead.' );
+				scene = scene[ 0 ];
+
+			}
+
+			var size = renderer.getSize();
+			size.width /= 2;
+
+			renderer.setScissorTest( true );
+			renderer.clear();
+
+			if ( camera.parent === null ) camera.updateMatrixWorld();
+
+			cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, camera.near, camera.far );
+			cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, camera.near, camera.far );
+
+			camera.matrixWorld.decompose( cameraL.position, cameraL.quaternion, cameraL.scale );
+			camera.matrixWorld.decompose( cameraR.position, cameraR.quaternion, cameraR.scale );
+
+			cameraL.translateX( eyeTranslationL.x * this.scale );
+			cameraR.translateX( eyeTranslationR.x * this.scale );
+
+			// render left eye
+			renderer.setViewport( 0, 0, size.width, size.height );
+			renderer.setScissor( 0, 0, size.width, size.height );
+			renderer.render( scene, cameraL );
+
+			// render right eye
+			renderer.setViewport( size.width, 0, size.width, size.height );
+			renderer.setScissor( size.width, 0, size.width, size.height );
+			renderer.render( scene, cameraR );
+
+			renderer.setScissorTest( false );
+
+			return;
+
+		}
+
+		// Regular render mode if not HMD
+
+		renderer.render( scene, camera );
+
+	};
+
+	//
+
+	function fovToNDCScaleOffset( fov ) {
+
+		var pxscale = 2.0 / ( fov.leftTan + fov.rightTan );
+		var pxoffset = ( fov.leftTan - fov.rightTan ) * pxscale * 0.5;
+		var pyscale = 2.0 / ( fov.upTan + fov.downTan );
+		var pyoffset = ( fov.upTan - fov.downTan ) * pyscale * 0.5;
+		return { scale: [ pxscale, pyscale ], offset: [ pxoffset, pyoffset ] };
+
+	}
+
+	function fovPortToProjection( fov, rightHanded, zNear, zFar ) {
+
+		rightHanded = rightHanded === undefined ? true : rightHanded;
+		zNear = zNear === undefined ? 0.01 : zNear;
+		zFar = zFar === undefined ? 10000.0 : zFar;
+
+		var handednessScale = rightHanded ? - 1.0 : 1.0;
+
+		// start with an identity matrix
+		var mobj = new THREE.Matrix4();
+		var m = mobj.elements;
+
+		// and with scale/offset info for normalized device coords
+		var scaleAndOffset = fovToNDCScaleOffset( fov );
+
+		// X result, map clip edges to [-w,+w]
+		m[ 0 * 4 + 0 ] = scaleAndOffset.scale[ 0 ];
+		m[ 0 * 4 + 1 ] = 0.0;
+		m[ 0 * 4 + 2 ] = scaleAndOffset.offset[ 0 ] * handednessScale;
+		m[ 0 * 4 + 3 ] = 0.0;
+
+		// Y result, map clip edges to [-w,+w]
+		// Y offset is negated because this proj matrix transforms from world coords with Y=up,
+		// but the NDC scaling has Y=down (thanks D3D?)
+		m[ 1 * 4 + 0 ] = 0.0;
+		m[ 1 * 4 + 1 ] = scaleAndOffset.scale[ 1 ];
+		m[ 1 * 4 + 2 ] = - scaleAndOffset.offset[ 1 ] * handednessScale;
+		m[ 1 * 4 + 3 ] = 0.0;
+
+		// Z result (up to the app)
+		m[ 2 * 4 + 0 ] = 0.0;
+		m[ 2 * 4 + 1 ] = 0.0;
+		m[ 2 * 4 + 2 ] = zFar / ( zNear - zFar ) * - handednessScale;
+		m[ 2 * 4 + 3 ] = ( zFar * zNear ) / ( zNear - zFar );
+
+		// W result (= Z in)
+		m[ 3 * 4 + 0 ] = 0.0;
+		m[ 3 * 4 + 1 ] = 0.0;
+		m[ 3 * 4 + 2 ] = handednessScale;
+		m[ 3 * 4 + 3 ] = 0.0;
+
+		mobj.transpose();
+
+		return mobj;
+
+	}
+
+	function fovToProjection( fov, rightHanded, zNear, zFar ) {
+
+		var DEG2RAD = Math.PI / 180.0;
+
+		var fovPort = {
+			upTan: Math.tan( fov.upDegrees * DEG2RAD ),
+			downTan: Math.tan( fov.downDegrees * DEG2RAD ),
+			leftTan: Math.tan( fov.leftDegrees * DEG2RAD ),
+			rightTan: Math.tan( fov.rightDegrees * DEG2RAD )
+		};
+
+		return fovPortToProjection( fovPort, rightHanded, zNear, zFar );
+
+	}
 
 };
 
@@ -53158,7 +53185,7 @@ module.exports.Component = registerComponent('camera', {
   }
 });
 
-},{"../../lib/three":2,"../core/component":53}],28:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53}],28:[function(require,module,exports){
 var registerComponent = require('../core/component').registerComponent;
 var utils = require('../utils/');
 
@@ -53323,7 +53350,7 @@ function getFog (data) {
   return fog;
 }
 
-},{"../../lib/three":2,"../core/component":53,"../utils/debug":57}],30:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"../utils/debug":57}],30:[function(require,module,exports){
 var debug = require('../utils/debug');
 var registerComponent = require('../core/component').registerComponent;
 var THREE = require('../../lib/three');
@@ -53515,7 +53542,7 @@ function applyTranslate (geometry, translate, currentTranslate) {
   geometry.verticesNeedsUpdate = true;
 }
 
-},{"../../lib/three":2,"../core/component":53,"../utils":58,"../utils/debug":57}],31:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"../utils":58,"../utils/debug":57}],31:[function(require,module,exports){
 require('../components/camera');
 require('../components/cursor');
 require('../components/fog');
@@ -53669,7 +53696,7 @@ function getLight (data) {
   }
 }
 
-},{"../../lib/three":2,"../core/component":53,"../utils":58,"../utils/debug":57}],33:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"../utils":58,"../utils/debug":57}],33:[function(require,module,exports){
 var debug = require('../utils/debug');
 var registerComponent = require('../core/component').registerComponent;
 var parseUrl = require('../utils/src-loader').parseUrl;
@@ -53744,7 +53771,7 @@ module.exports.Component = registerComponent('loader', {
   }
 });
 
-},{"../../lib/three":2,"../core/component":53,"../utils/debug":57,"../utils/src-loader":59}],34:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"../utils/debug":57,"../utils/src-loader":59}],34:[function(require,module,exports){
 var debug = require('../utils/debug');
 var coordinates = require('../utils/coordinates');
 var registerComponent = require('../core/component').registerComponent;
@@ -53866,7 +53893,7 @@ module.exports.Component = registerComponent('look-at', {
   stringify: coordinates.componentMixin.stringify
 });
 
-},{"../../lib/three":2,"../core/component":53,"../utils/coordinates":56,"../utils/debug":57}],35:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"../utils/coordinates":56,"../utils/debug":57}],35:[function(require,module,exports){
 var registerComponent = require('../core/component').registerComponent;
 var THREE = require('../../lib/three');
 
@@ -54066,7 +54093,7 @@ module.exports.Component = registerComponent('look-controls', {
   }
 });
 
-},{"../../lib/three":2,"../core/component":53}],36:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53}],36:[function(require,module,exports){
 /* global Promise */
 var debug = require('../utils/debug');
 var diff = require('../utils').diff;
@@ -54390,10 +54417,10 @@ function loadVideoTexture (material, src, height, width, loadedStereoscopicTextu
     material.needsUpdate = true;
     if (stereoscopicDirection && loadedStereoscopicTexture) loadedStereoscopicTexture();
   };
-  if (videoEl.videoWidth) {
-    loaded();
-  } else {
+  if (typeof src === 'string') {
     videoEl.onloadeddata = loaded;
+  } else {
+    loaded();
   }
 }
 
@@ -54490,7 +54517,7 @@ function getSide (side) {
   }
 }
 
-},{"../../lib/three":2,"../core/component":53,"../utils":58,"../utils/debug":57,"../utils/src-loader":59}],37:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"../utils":58,"../utils/debug":57,"../utils/src-loader":59}],37:[function(require,module,exports){
 var coordinatesMixin = require('../utils/coordinates').componentMixin;
 var registerComponent = require('../core/component').registerComponent;
 var utils = require('../utils/');
@@ -54608,7 +54635,7 @@ module.exports.Component = registerComponent('raycaster', {
   }
 });
 
-},{"../../lib/three":2,"../core/component":53,"request-interval":16}],39:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"request-interval":15}],39:[function(require,module,exports){
 var coordinatesMixin = require('../utils/coordinates').componentMixin;
 var registerComponent = require('../core/component').registerComponent;
 var THREE = require('../../lib/three');
@@ -54634,7 +54661,7 @@ module.exports.Component = registerComponent('rotation', utils.extend({
   }
 }, coordinatesMixin));
 
-},{"../../lib/three":2,"../core/component":53,"../utils/":58,"../utils/coordinates":56}],40:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"../utils/":58,"../utils/coordinates":56}],40:[function(require,module,exports){
 var coordinatesMixin = require('../utils/coordinates').componentMixin;
 var registerComponent = require('../core/component').registerComponent;
 var utils = require('../utils/');
@@ -54769,7 +54796,7 @@ module.exports.Component = registerComponent('sound', {
   }
 });
 
-},{"../../lib/three":2,"../core/component":53,"../utils":58,"../utils/debug":57}],42:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53,"../utils":58,"../utils/debug":57}],42:[function(require,module,exports){
 var registerComponent = require('../core/component').registerComponent;
 
 /**
@@ -54930,7 +54957,7 @@ module.exports.Component = registerComponent('wasd-controls', {
   })()
 });
 
-},{"../../lib/three":2,"../core/component":53}],44:[function(require,module,exports){
+},{"../../lib/three":1,"../core/component":53}],44:[function(require,module,exports){
 /**
  * Animation configuration options for TWEEN.js animations.
  * Used by `<a-animation>`.
@@ -56082,7 +56109,7 @@ AEntity = registerElement('a-entity', {
 });
 module.exports = AEntity;
 
-},{"../../lib/three":2,"../utils/debug":57,"./a-node":50,"./a-register-element":51,"./component":53}],49:[function(require,module,exports){
+},{"../../lib/three":1,"../utils/debug":57,"./a-node":50,"./a-register-element":51,"./component":53}],49:[function(require,module,exports){
 /* global HTMLElement */
 var AComponents = require('./component').components;
 var ANode = require('./a-node');
@@ -56526,7 +56553,7 @@ function copyProperties (source, destination) {
 var ANode = require('./a-node');
 var AEntity = require('./a-entity');
 
-},{"./a-entity":48,"./a-node":50,"document-register-element":12}],52:[function(require,module,exports){
+},{"./a-entity":48,"./a-node":50,"document-register-element":11}],52:[function(require,module,exports){
 /* global MessageChannel, Promise */
 var re = require('./a-register-element');
 var RStats = require('../../lib/vendor/rStats');
@@ -57106,7 +57133,17 @@ var AScene = module.exports = registerElement('a-scene', {
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.sortObjects = false;
         AScene.renderer = renderer;
-        this.stereoRenderer = new THREE.VREffect(renderer, null, this.leftPreprocess.bind(this), this.rightPreprocess.bind(this));
+        var self = this;
+        renderer.orgSetViewport = renderer.setViewport;
+        renderer.setViewport = function (left, top, width, height) {
+          if (left === 0) {
+            self.leftPreprocess();
+          } else {
+            self.rightPreprocess();
+          }
+          renderer.orgSetViewport(left, top, width, height);
+        };
+        this.stereoRenderer = new THREE.VREffect(renderer);
       },
       writable: window.debug
     },
@@ -57386,7 +57423,7 @@ function injectMetaTags () {
   headEl.appendChild(meta);
 }
 
-},{"../../lib/three":2,"../../lib/vendor/rStats":4,"../../lib/vendor/wakelock/wakelock":6,"../utils/":58,"./a-entity":48,"./a-register-element":51,"tween.js":24}],53:[function(require,module,exports){
+},{"../../lib/three":1,"../../lib/vendor/rStats":3,"../../lib/vendor/wakelock/wakelock":5,"../utils/":58,"./a-entity":48,"./a-register-element":51,"tween.js":24}],53:[function(require,module,exports){
 var debug = require('../utils/debug');
 var styleParser = require('style-attr');
 var utils = require('../utils/');
@@ -57640,7 +57677,7 @@ function transformKeysToCamelCase (obj) {
   return camelCaseObj;
 }
 
-},{"../utils/":58,"../utils/debug":57,"style-attr":19}],54:[function(require,module,exports){
+},{"../utils/":58,"../utils/debug":57,"style-attr":18}],54:[function(require,module,exports){
 require('es6-promise').polyfill();  // Polyfill `Promise`.
 require('present');  // Polyfill `performance.now()`.
 
@@ -57690,7 +57727,7 @@ module.exports = {
   version: pkg.version
 };
 
-},{"../lib/three":2,"../package":26,"../style/aframe-core.css":60,"../style/rStats.css":61,"./components/index":31,"./core/a-animation":45,"./core/a-assets":46,"./core/a-cubemap":47,"./core/a-entity":48,"./core/a-mixin":49,"./core/a-node":50,"./core/a-register-element":51,"./core/a-scene":52,"./core/component":53,"./utils/":58,"./utils/debug":57,"es6-promise":13,"present":15,"webvr-polyfill":25}],55:[function(require,module,exports){
+},{"../lib/three":1,"../package":26,"../style/aframe-core.css":60,"../style/rStats.css":61,"./components/index":31,"./core/a-animation":45,"./core/a-assets":46,"./core/a-cubemap":47,"./core/a-entity":48,"./core/a-mixin":49,"./core/a-node":50,"./core/a-register-element":51,"./core/a-scene":52,"./core/component":53,"./utils/":58,"./utils/debug":57,"es6-promise":12,"present":14,"webvr-polyfill":25}],55:[function(require,module,exports){
 var coordinates = require('./coordinates');
 var utils = require('./index');
 
@@ -57909,7 +57946,7 @@ module.exports = debug;
 
 }).call(this,require('_process'))
 
-},{"_process":8,"debug":9,"object-assign":14}],58:[function(require,module,exports){
+},{"_process":7,"debug":8,"object-assign":13}],58:[function(require,module,exports){
 /* global CustomEvent, location */
 /* Centralized place to reference utilities since utils is exposed to the user. */
 var objectAssign = require('object-assign');
@@ -58095,7 +58132,7 @@ module.exports.getUrlParameter = function (name) {
 // Must be at bottom to avoid circular dependency.
 module.exports.srcLoader = require('./src-loader');
 
-},{"./coerce":55,"./coordinates":56,"./src-loader":59,"object-assign":14}],59:[function(require,module,exports){
+},{"./coerce":55,"./coordinates":56,"./src-loader":59,"object-assign":13}],59:[function(require,module,exports){
 /* global Image */
 var debug = require('./debug');
 
@@ -58135,29 +58172,11 @@ function validateSrc (src, isImageCb, isVideoCb) {
   if (!textureEl) { return; }
   isImage = textureEl && textureEl.tagName === 'IMG';
   isVideo = textureEl && textureEl.tagName === 'VIDEO';
-  if (isImage) {
-    if (textureEl.complete) {
-      return isImageCb(textureEl);
-    } else {
-      textureEl.onload = function () {
-        textureEl.onload = null;
-        return isImageCb(textureEl);
-      };
-    }
-  } else if (isVideo) {
-    if (textureEl.videoWidth) {
-      return isVideoCb(textureEl);
-    } else {
-      textureEl.onloadeddata = function () {
-        textureEl.onloadeddata = null;
-        return isVideoCb(textureEl);
-      };
-    }
-  } else {
-    // src is a valid selector but doesn't match with a <img> or <video> element.
-    warn('"%s" does not point to a valid <img> or <video> element', src);
-    return;
-  }
+  if (isImage) { return isImageCb(textureEl); }
+  if (isVideo) { return isVideoCb(textureEl); }
+
+  // src is a valid selector but doesn't match with a <img> or <video> element.
+  warn('"%s" does not point to a valid <img> or <video> element', src);
 }
 
 /**
@@ -58260,8 +58279,8 @@ module.exports = {
 
 },{"./debug":57}],60:[function(require,module,exports){
 var css = "html{bottom:0;left:0;position:fixed;right:0;top:0}body{height:100%;margin:0;overflow:hidden;padding:0;width:100%}.a-hidden{display:none!important}.a-canvas{height:100%;left:0;position:absolute;top:0;width:100%}a-assets,a-scene img,a-scene video{display:none}.a-enter-vr{align-items:flex-end;-webkit-align-items:flex-end;bottom:5px;display:flex;display:-webkit-flex;font-family:sans-serif,monospace;font-size:13px;font-weight:200;line-height:16px;height:72px;position:fixed;right:5px}.a-enter-vr-button{background:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20245.82%20141.73%22%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill%3A%23fff%3Bfill-rule%3Aevenodd%3B%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Ctitle%3Emask%3C%2Ftitle%3E%3Cpath%20class%3D%22a%22%20d%3D%22M175.56%2C111.37c-22.52%2C0-40.77-18.84-40.77-42.07S153%2C27.24%2C175.56%2C27.24s40.77%2C18.84%2C40.77%2C42.07S198.08%2C111.37%2C175.56%2C111.37ZM26.84%2C69.31c0-23.23%2C18.25-42.07%2C40.77-42.07s40.77%2C18.84%2C40.77%2C42.07-18.26%2C42.07-40.77%2C42.07S26.84%2C92.54%2C26.84%2C69.31ZM27.27%2C0C11.54%2C0%2C0%2C12.34%2C0%2C28.58V110.9c0%2C16.24%2C11.54%2C30.83%2C27.27%2C30.83H99.57c2.17%2C0%2C4.19-1.83%2C5.4-3.7L116.47%2C118a8%2C8%2C0%2C0%2C1%2C12.52-.18l11.51%2C20.34c1.2%2C1.86%2C3.22%2C3.61%2C5.39%2C3.61h72.29c15.74%2C0%2C27.63-14.6%2C27.63-30.83V28.58C245.82%2C12.34%2C233.93%2C0%2C218.19%2C0H27.27Z%22%2F%3E%3C%2Fsvg%3E) 50% 50%/70% 70% no-repeat rgba(0,0,0,.35);border:0;bottom:0;color:#FFF;cursor:pointer;height:50px;transition:background .05s ease;-webkit-transition:background .05s ease;width:60px;z-index:999999}.a-enter-vr-button:active,.a-enter-vr-button:hover{background-color:#666}[data-a-enter-vr-no-webvr] .a-enter-vr-button{border-color:#666;opacity:.65}[data-a-enter-vr-no-webvr] .a-enter-vr-button:active,[data-a-enter-vr-no-webvr] .a-enter-vr-button:hover{background-color:rgba(0,0,0,.35);cursor:not-allowed}.a-enter-vr-modal{background-color:#666;border-radius:0;color:#FFF;height:32px;opacity:0;margin-right:10px;padding:9px;width:280px;position:relative;transition:opacity .05s ease;-webkit-transition:opacity .05s ease}.a-enter-vr-modal:after{border-bottom:10px solid transparent;border-left:10px solid #666;border-top:10px solid transparent;display:inline-block;content:'';position:absolute;right:-5px;top:5px;width:0;height:0}.a-enter-vr-modal p{margin:0;display:inline}.a-enter-vr-modal p:after{content:' '}.a-enter-vr-modal a{color:#FFF;display:inline}[data-a-enter-vr-no-headset]:hover .a-enter-vr-modal,[data-a-enter-vr-no-webvr]:hover .a-enter-vr-modal{opacity:1}.a-orientation-modal{position:absolute;width:100%;height:100%;top:0;left:0;background:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20xmlns%3Axlink%3D%22http%3A//www.w3.org/1999/xlink%22%20version%3D%221.1%22%20x%3D%220px%22%20y%3D%220px%22%20viewBox%3D%220%200%2090%2090%22%20enable-background%3D%22new%200%200%2090%2090%22%20xml%3Aspace%3D%22preserve%22%3E%3Cpolygon%20points%3D%220%2C0%200%2C0%200%2C0%20%22%3E%3C/polygon%3E%3Cg%3E%3Cpath%20d%3D%22M71.545%2C48.145h-31.98V20.743c0-2.627-2.138-4.765-4.765-4.765H18.456c-2.628%2C0-4.767%2C2.138-4.767%2C4.765v42.789%20%20%20c0%2C2.628%2C2.138%2C4.766%2C4.767%2C4.766h5.535v0.959c0%2C2.628%2C2.138%2C4.765%2C4.766%2C4.765h42.788c2.628%2C0%2C4.766-2.137%2C4.766-4.765V52.914%20%20%20C76.311%2C50.284%2C74.173%2C48.145%2C71.545%2C48.145z%20M18.455%2C16.935h16.344c2.1%2C0%2C3.808%2C1.708%2C3.808%2C3.808v27.401H37.25V22.636%20%20%20c0-0.264-0.215-0.478-0.479-0.478H16.482c-0.264%2C0-0.479%2C0.214-0.479%2C0.478v36.585c0%2C0.264%2C0.215%2C0.478%2C0.479%2C0.478h7.507v7.644%20%20%20h-5.534c-2.101%2C0-3.81-1.709-3.81-3.81V20.743C14.645%2C18.643%2C16.354%2C16.935%2C18.455%2C16.935z%20M16.96%2C23.116h19.331v25.031h-7.535%20%20%20c-2.628%2C0-4.766%2C2.139-4.766%2C4.768v5.828h-7.03V23.116z%20M71.545%2C73.064H28.757c-2.101%2C0-3.81-1.708-3.81-3.808V52.914%20%20%20c0-2.102%2C1.709-3.812%2C3.81-3.812h42.788c2.1%2C0%2C3.809%2C1.71%2C3.809%2C3.812v16.343C75.354%2C71.356%2C73.645%2C73.064%2C71.545%2C73.064z%22%3E%3C/path%3E%3Cpath%20d%3D%22M28.919%2C58.424c-1.466%2C0-2.659%2C1.193-2.659%2C2.66c0%2C1.466%2C1.193%2C2.658%2C2.659%2C2.658c1.468%2C0%2C2.662-1.192%2C2.662-2.658%20%20%20C31.581%2C59.617%2C30.387%2C58.424%2C28.919%2C58.424z%20M28.919%2C62.786c-0.939%2C0-1.703-0.764-1.703-1.702c0-0.939%2C0.764-1.704%2C1.703-1.704%20%20%20c0.94%2C0%2C1.705%2C0.765%2C1.705%2C1.704C30.623%2C62.022%2C29.858%2C62.786%2C28.919%2C62.786z%22%3E%3C/path%3E%3Cpath%20d%3D%22M69.654%2C50.461H33.069c-0.264%2C0-0.479%2C0.215-0.479%2C0.479v20.288c0%2C0.264%2C0.215%2C0.478%2C0.479%2C0.478h36.585%20%20%20c0.263%2C0%2C0.477-0.214%2C0.477-0.478V50.939C70.131%2C50.676%2C69.917%2C50.461%2C69.654%2C50.461z%20M69.174%2C51.417V70.75H33.548V51.417H69.174z%22%3E%3C/path%3E%3Cpath%20d%3D%22M45.201%2C30.296c6.651%2C0%2C12.233%2C5.351%2C12.551%2C11.977l-3.033-2.638c-0.193-0.165-0.507-0.142-0.675%2C0.048%20%20%20c-0.174%2C0.198-0.153%2C0.501%2C0.045%2C0.676l3.883%2C3.375c0.09%2C0.075%2C0.198%2C0.115%2C0.312%2C0.115c0.141%2C0%2C0.273-0.061%2C0.362-0.166%20%20%20l3.371-3.877c0.173-0.2%2C0.151-0.502-0.047-0.675c-0.194-0.166-0.508-0.144-0.676%2C0.048l-2.592%2C2.979%20%20%20c-0.18-3.417-1.629-6.605-4.099-9.001c-2.538-2.461-5.877-3.817-9.404-3.817c-0.264%2C0-0.479%2C0.215-0.479%2C0.479%20%20%20C44.72%2C30.083%2C44.936%2C30.296%2C45.201%2C30.296z%22%3E%3C/path%3E%3C/g%3E%3C/svg%3E) center center/50% 50% no-repeat rgba(244,244,244,1)}.a-orientation-modal:after{content:\"Insert phone into Cardboard holder.\";color:#333;font-family:sans-serif,monospace;font-size:13px;text-align:center;position:absolute;width:100%;top:70%;transform:translateY(-70%)}.a-orientation-modal button{background:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20xmlns%3Axlink%3D%22http%3A//www.w3.org/1999/xlink%22%20version%3D%221.1%22%20x%3D%220px%22%20y%3D%220px%22%20viewBox%3D%220%200%20100%20100%22%20enable-background%3D%22new%200%200%20100%20100%22%20xml%3Aspace%3D%22preserve%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M55.209%2C50l17.803-17.803c1.416-1.416%2C1.416-3.713%2C0-5.129c-1.416-1.417-3.713-1.417-5.129%2C0L50.08%2C44.872%20%20L32.278%2C27.069c-1.416-1.417-3.714-1.417-5.129%2C0c-1.417%2C1.416-1.417%2C3.713%2C0%2C5.129L44.951%2C50L27.149%2C67.803%20%20c-1.417%2C1.416-1.417%2C3.713%2C0%2C5.129c0.708%2C0.708%2C1.636%2C1.062%2C2.564%2C1.062c0.928%2C0%2C1.856-0.354%2C2.564-1.062L50.08%2C55.13l17.803%2C17.802%20%20c0.708%2C0.708%2C1.637%2C1.062%2C2.564%2C1.062s1.856-0.354%2C2.564-1.062c1.416-1.416%2C1.416-3.713%2C0-5.129L55.209%2C50z%22%3E%3C/path%3E%3C/svg%3E);width:50px;height:50px;border:none;text-indent:-9999px}@media (min-width:480px){.a-enter-vr{bottom:20px;right:20px}.a-enter-vr-modal{width:400px}}"; (require("browserify-css").createStyle(css, { "href": "style\\aframe-core.css"})); module.exports = css;
-},{"browserify-css":7}],61:[function(require,module,exports){
+},{"browserify-css":6}],61:[function(require,module,exports){
 var css = ".rs-base{background-color:#EF2D5E;border-radius:0;font-family:'Roboto Condensed',tahoma,sans-serif;font-size:10px;line-height:1.2em;opacity:.75;overflow:hidden;padding:10px;position:fixed;left:5px;top:5px;width:270px;z-index:10000}.rs-base.hidden{display:none}.rs-base h1{color:#fff;cursor:pointer;font-size:1.4em;font-weight:300;margin:0 0 5px;padding:0}.rs-group{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column-reverse;flex-direction:column-reverse}.rs-counter-base{align-items:center;display:-webkit-box;display:-webkit-flex;display:flex;height:10px;-webkit-justify-content:space-between;justify-content:space-between;margin:2px 0}.rs-counter-id{font-weight:300;-webkit-box-ordinal-group:0;-webkit-order:0;order:0}.rs-counter-value{font-weight:300;-webkit-box-ordinal-group:1;-webkit-order:1;order:1;text-align:right;width:25px}.rs-canvas{-webkit-box-ordinal-group:2;-webkit-order:2;order:2}@media (min-width:480px){.rs-base{left:20px;top:20px}}"; (require("browserify-css").createStyle(css, { "href": "style\\rStats.css"})); module.exports = css;
-},{"browserify-css":7}]},{},[54])(54)
+},{"browserify-css":6}]},{},[54])(54)
 });
 //# sourceMappingURL=aframe-core.js.map
