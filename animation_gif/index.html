@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <title>load gif</title>
+  <script src="gifsparser.js"></script>
+  <script src="aframe-core.js"></script>
+  <script>
+    AFRAME.registerComponent('gifsSrc', {
+      dependencies: ['material'],
+      schema: {
+        canvas: { default: '' },
+        src: { default: '' }
+      },
+      init: function(){
+        this.startTime = 0;
+        this.nextFrameTime = 0;
+        this.frameIdx = 0;
+        this.frameCnt = 0;
+        this.delayTimes = null;
+        this.infinity = false;
+        this.loopCnt = 0;
+        this.width = 0;
+        this.height = 0;
+        this.animeFrames = null;
+        this.cnv = null;
+        this.rafId = 0;
+        this.initFlg = true;
+      },
+      update: function () {
+        if (this.initFlg) {
+          this.initFlg = false;
+          this.cnv = document.querySelector(this.data.canvas);
+          loadGIF(this.data.src, function (times, cnt, frames) {
+            this.delayTimes = times;
+            cnt ? this.loopCnt = cnt : this.infinity = true;
+            this.animeFrames = frames;
+            this.frameCnt = times.length;
+            this.cnv.width = this.width = frames[0].width;
+            this.cnv.height = this.height = frames[0].width;
+            this.cnv.style.width = (this.width / 2 | 0) + 'px';
+            this.cnv.style.height = (this.height / 2 | 0) + 'px';
+            document.body.appendChild(this.cnv);
+            this.ctx = this.cnv.getContext('2d');
+            this.ctx.drawImage(frames[0], 0, 0);
+            this.texture = new THREE.Texture(this.cnv);
+            this.el.object3D.material.map = this.texture;
+            this.startTime = Date.now();
+            this.el.sceneEl.addBehavior(this);
+          }.bind(this), function (err) { console.log(err) });
+        } else {
+          (Date.now() - this.startTime) >= this.nextFrameTime && this.nextFrame.call(this);
+        }
+      },
+
+      nextFrame: function () {
+        this.ctx.drawImage(this.animeFrames[this.frameIdx], 0, 0, this.width, this.height, 0, 0, this.width, this.height);
+        this.texture.needsUpdate = true; // don't work?
+        this.el.object3D.material.map.needsUpdate = true; // don't work? 
+        var now = Date.now() - this.startTime;
+        while (now >= this.nextFrameTime) {
+          this.nextFrameTime += this.delayTimes[this.frameIdx++];
+          if ((this.infinity || this.loopCnt) && this.frameCnt <= this.frameIdx) {
+            this.frameIdx = 0;
+            this.loopCnt && --this.loopCnt && !this.loopCnt && this.rafId && cancelAnimationFrame(this.rafId);
+          }
+        }
+      }
+    });
+  </script>
+</head>
+<body>
+  <a-assets>
+    <canvas id="cnv" width="2" height="2"></canvas>
+  </a-assets>
+  <a-scene>
+    <a-entity position="0 0 -200" geometry="primitive: plane; width: 400; height: 400" material="color:gray;src: #cnv;" gifsSrc="canvas: #cnv; src: i.gif"></a-entity> 
+  </a-scene>
+</body>
+</html>
