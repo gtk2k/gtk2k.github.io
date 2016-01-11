@@ -42,6 +42,14 @@
             this.cnv.style.width = (this.width / 2 | 0) + 'px';
             this.cnv.style.height = (this.height / 2 | 0) + 'px';
             document.body.appendChild(this.cnv);
+            var span = document.createElement('span');
+            span.style.position = 'absolute';
+            span.style.left = span.style.top = 0;
+            span.style.margin = '5px';
+            span.style.fontSize = '20px';
+            span.style.color = 'white';
+            span.textContent = 'canvas preview';
+            document.body.appendChild(span);
             this.ctx = this.cnv.getContext('2d');
             this.ctx.drawImage(frames[0], 0, 0);
             this.texture = new THREE.Texture(this.cnv);
@@ -75,7 +83,7 @@
     <canvas id="cnv" width="2" height="2"></canvas>
   </a-assets>
   <a-scene>
-    <a-entity position="0 0 -200" geometry="primitive: plane; width: 400; height: 400" material="color:gray;src: #cnv;" gifsSrc="canvas: #cnv; src: i.gif"></a-entity> 
+    <a-entity position="0 0 -200" geometry="primitive: plane; width: 400; height: 400" material="src: #cnv; color:gray;" gifsSrc="canvas: #cnv; src: i.gif"></a-entity> 
   </a-scene>
 </body>
 </html>
