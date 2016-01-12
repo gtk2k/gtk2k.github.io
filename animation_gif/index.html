@@ -1,14 +1,13 @@
-<!DOCTYPE html>
-
+﻿<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
   <title>load gif</title>
-  <script src="gifsparser.js"></script>
-  <script src="aframe-core.js"></script>
+  <script src="js/gifsparser.js"></script>
+  <script src="js/aframe.js"></script>
   <script>
-    AFRAME.registerComponent('gifsSrc', {
-      dependencies: ['material'],
+    AFRAME.aframeCore.registerComponent('gifsSrc', {
+      //dependencies: ['material'],
       schema: {
         canvas: { default: '' },
         src: { default: '' }
@@ -23,7 +22,7 @@
         this.loopCnt = 0;
         this.width = 0;
         this.height = 0;
-        this.animeFrames = null;
+        this.frames = null;
         this.cnv = null;
         this.rafId = 0;
         this.initFlg = true;
@@ -35,13 +34,11 @@
           loadGIF(this.data.src, function (times, cnt, frames) {
             this.delayTimes = times;
             cnt ? this.loopCnt = cnt : this.infinity = true;
-            this.animeFrames = frames;
+            this.frames = frames;
             this.frameCnt = times.length;
             this.cnv.width = this.width = frames[0].width;
             this.cnv.height = this.height = frames[0].width;
-            this.cnv.style.width = (this.width / 2 | 0) + 'px';
-            this.cnv.style.height = (this.height / 2 | 0) + 'px';
-            document.body.appendChild(this.cnv);
+            //document.body.appendChild(this.cnv);
             var span = document.createElement('span');
             span.style.position = 'absolute';
             span.style.left = span.style.top = 0;
@@ -49,11 +46,13 @@
             span.style.fontSize = '20px';
             span.style.color = 'white';
             span.textContent = 'canvas preview';
-            document.body.appendChild(span);
+            //document.body.appendChild(span);
             this.ctx = this.cnv.getContext('2d');
             this.ctx.drawImage(frames[0], 0, 0);
             this.texture = new THREE.Texture(this.cnv);
-            this.el.object3D.material.map = this.texture;
+            this.texture.minFilter = THREE.LinearFilter;
+            this.texture.magFilter = THREE.LinearFilter;
+            this.el.object3D.material = new THREE.MeshBasicMaterial({map:this.texture});
             this.startTime = Date.now();
             this.el.sceneEl.addBehavior(this);
           }.bind(this), function (err) { console.log(err) });
@@ -63,11 +62,9 @@
       },
 
       nextFrame: function () {
-        this.ctx.drawImage(this.animeFrames[this.frameIdx], 0, 0, this.width, this.height, 0, 0, this.width, this.height);
-        this.texture.needsUpdate = true; // don't work?
-        this.el.object3D.material.map.needsUpdate = true; // don't work? 
-        var now = Date.now() - this.startTime;
-        while (now >= this.nextFrameTime) {
+        this.ctx.drawImage(this.frames[this.frameIdx], 0, 0);
+        this.texture.needsUpdate = true;
+        while ((Date.now() - this.startTime) >= this.nextFrameTime) {
           this.nextFrameTime += this.delayTimes[this.frameIdx++];
           if ((this.infinity || this.loopCnt) && this.frameCnt <= this.frameIdx) {
             this.frameIdx = 0;
@@ -83,7 +80,7 @@
     <canvas id="cnv" width="2" height="2"></canvas>
   </a-assets>
   <a-scene>
-    <a-entity position="0 0 -200" geometry="primitive: plane; width: 400; height: 400" material="src: #cnv; color:gray;" gifsSrc="canvas: #cnv; src: i.gif"></a-entity> 
+    <a-entity position="0 0 -300" geometry="primitive: plane; width: 400; height: 400" gifsSrc="canvas: #cnv; src: img/i.gif"></a-entity>
   </a-scene>
 </body>
 </html>

@@ -6,20 +6,25 @@
     xhr.onload = function (e) {
       parseGIF(new Uint8Array(e.target.response), successCB, errorCB);
     }
-    xhr.onerror = function () { errorCB && errorCB('loadGIF: load error'); };
+    xhr.onerror = function () {
+      errorCB && errorCB('loadGIF: load error');
+    };
     xhr.send();
   }
 
   function parseGIF(gif, successCB, errorCB) {
-    var pos = 0, duration = 0, delayTimes = [], width = 0, height = 0, loadCnt = 0;
-    var graphicControl = null, imageData = null, frames = [], loopCnt = 0;
+    var pos = 0;
+    var delayTimes = [];
+    var loadCnt = 0;
+    var graphicControl = null;
+    var imageData = null;
+    var frames = [];
+    var loopCnt = 0;
     if (gif[0] === 0x47 && gif[1] === 0x49 && gif[2] === 0x46 && // 'GIF'
       gif[3] === 0x38 && gif[4] === 0x39 && gif[5] === 0x61) { // '89a'
-      width = gif[6] + (gif[7] << 8);
-      height = gif[8] + (gif[9] << 8);
-      pos = gif[10] & 0xf0 ? 13 + (256 * 3) : 13;
+      pos += 13 + (+!!(gif[10] & 0x80) * Math.pow(2, (gif[10] & 0x07) + 1) * 3);
       var gifHeader = gif.subarray(0, pos);
-      while (gif[pos] !== 0x3b) {
+      while (gif[pos] && gif[pos] !== 0x3b) {
         var offset = pos, blockId = gif[pos];
         if (blockId === 0x21) {
           var label = gif[++pos];
@@ -30,7 +35,8 @@
             label === 0xf9 && (graphicControl = gif.subarray(offset, pos + 1));
           } else { errorCB && errorCB('parseGIF: unknown label'); break; }
         } else if (blockId === 0x2c) {
-          pos += gif[pos += 9] & 0xf0 ? 10 + (256 * 3) : 10;
+          pos += 9;
+          pos += 1 + (+!!(gif[pos] & 0x80) * (Math.pow(2, (gif[pos] & 0x07) + 1) * 3));
           while (gif[++pos]) pos += gif[pos];
           var imageData = gif.subarray(offset, pos + 1);
           frames.push(URL.createObjectURL(new Blob([gifHeader, graphicControl, imageData])));
@@ -39,17 +45,40 @@
       }
     } else { errorCB && errorCB('parseGIF: no GIF89a'); }
     if (frames.length) {
-      frames.forEach(function (url, i) {
+      var loadImg = function () {
+        var cnv = document.createElement('canvas');
+        cnv.width = frames[0].width;
+        cnv.height = frames[0].height;
+        var ctx = cnv.getContext('2d');
+        frames.forEach(function (src, i) {
+          var img = new Image();
+          img.onload = function (e, i) {
+            loadCnt++;
+            frames[i] = this;
+            if (loadCnt === frames.length) {
+              loadCnt = 0;
+              imageFix(1);
+            }
+          }.bind(img, null, i);
+          img.src = src;
+        });
+      }
+      var imageFix = function (i) {
         var img = new Image();
         img.onload = function (e, i) {
           loadCnt++;
           frames[i] = this;
-          if (loadCnt === frames.length) successCB && successCB(delayTimes, loopCnt, frames);
-        }.bind(img, null, i);
-        img.src = url;
-      });
+          if (loadCnt === frames.length) {
+            ctx = null, cnv = null;
+            successCB && successCB(delayTimes, loopCnt, frames);
+          } else {
+            imageFix(++i);
+          }
+        }.bind(img);
+        img.src = cnv.toDataURL('image/gif');
+      }
+      loadImg();
     }
   }
   window.loadGIF = loadGIF;
 })();
-
