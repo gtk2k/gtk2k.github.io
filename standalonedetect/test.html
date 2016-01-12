@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>pin detect test</title>
+</head>
+<body>
+  <button onclick="location.href = location.href">reload</button>
+  <span id="msg"></span>
+  <script>
+    msg.textContent = navigator.standalone ? 'navigate from homescreen' : 'navigate from browser';
+  </script>
+</body>
