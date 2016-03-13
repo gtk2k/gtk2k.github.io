@@ -2,8 +2,9 @@
 three.js(WebGL)では、HTMLの<img>、<canvas>、<video>からテクスチャーを作成することが可能です。
 今回は動画を表示させるのが目的なので、<video>からテクスチャーを生成し表示(再生)させます。
 
-##STEP 1
+##STEP 1: Getting Started
 まずは、もっとも簡単なサンプルとして、Planeオブジェクトに動画テクスチャーを張り、表示(再生)させます。
+以降のステップはこのサンプルコードをベースとして進みます。
 ```js
     'use strict';
 
@@ -54,9 +55,9 @@ three.js(WebGL)では、HTMLの<img>、<canvas>、<video>からテクスチャ�
 
     function render() {
       requestAnimationFrame(render);
-      // movieTextureのフレームを更新する
+      // 毎フレーム 動画テクスチャーのneedsUpdateプロパティをtrueにセットすることで動画の再生を行う
       movieTexture.needsUpdate = true;
-      // コントローラーアップデート
+      // コントロールをアップデート
       controls.update();
       // レンダリング
       renderer.render(scene, camera);
@@ -69,4 +70,9 @@ three.js(WebGL)では、HTMLの<img>、<canvas>、<video>からテクスチャ�
     });
 ```
 (STEP 1 デモ)[https://gtk2k.github.io/threejs-movietexture/step1.html]
+
+##STEP 2: 警告を消す
+STEP 1で動画を再生させることができました。実行自体はできるのですが、ただ、開発ツールを開くとコンソールに警告が出続けてしまいます。
+この警告を出力させないようにするには、movieTextureのminFilterをLinearFilter(THREE.LinearFilter)に設定します。
+
 
