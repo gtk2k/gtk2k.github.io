@@ -64,9 +64,9 @@
 
     function render() {
       requestAnimationFrame(render);
-      // movieTextureのフレームを更新する
+      // 毎フレーム 動画テクスチャーのneedsUpdateプロパティをtrueにセットすることで動画の再生を行う
       movieTexture.needsUpdate = true;
-      // コントローラーアップデート
+      // コントロールをアップデート
       controls.update();
       // レンダリング
       renderer.render(scene, camera);
