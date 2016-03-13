@@ -39,7 +39,7 @@ three.js(WebGL)では、HTMLの<img>、<canvas>、<video>からテクスチャ�
 
       // テクスチャーにmovieTextureを使用してマテリアルを生成
       // sideプロパティには、THREE.FrontSide(表), THREE.BackSide(裏), THREE.DoubleSide(表裏両方)が設定できる
-      // THREE.DoubleSideを設定すると3Dオブジェクト(ポリゴン)の表はもとより裏を表示してもテクスチャーが描画される(裏は鏡像になる)。
+      // THREE.DoubleSideを設定すると3Dオブジェクト(ポリゴン)の表はもとより裏を表示してもテクスチャーが描画される(裏は鏡像になる)
       var material = new THREE.MeshBasicMaterial({ map: movieTexture, side: THREE.DoubleSide });
 
       var mesh = new THREE.Mesh(geometry, material);
