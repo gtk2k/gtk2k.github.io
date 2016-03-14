@@ -5,7 +5,7 @@ three.js(WebGL)では、HTMLのimgエレメント、canvasエレメント、vide
 ##STEP 1: Getting Started
 [STEP 1 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)  
 まずは、もっとも簡単なサンプルとして、Planeオブジェクトに動画テクスチャーを張り、再生させてみます。
-以降のステップはこのサンプルコードをベースとして進みます。
+以降のステップはこのサンプルコードをベースとして進みます。  
 (なお、WebGLで動画を描画していることを示すためコントロールを使ってマウスなどで回転・ズームできるようにしています)
 
 ```js
