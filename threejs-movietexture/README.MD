@@ -144,9 +144,13 @@ video.setAttribute('webkit-playsinline', true);
 equirectangular(エクイレクタングラー、日本語では正距円筒図法)という投影方式に変換された動画を使用します。  
 equirectangularに変換された動画のサンプル  
 ![equirectangular_sample](https://github.com/gtk2k/gtk2k.github.io/blob/master/threejs-movietexture/equirectangular_sample.gif)  
-テクスチャーを張り付ける3DオブジェクトにSphere(球)を使用します。
-カメラをSphereの中心に配置し、マテリアルを生成するときにレンダリングを行う面(side)をTHREE.BackSideもしくはTHREE.DoubleSideにすれば
-ＯＫです。
+テクスチャーを張り付ける3DオブジェクトにSphere(球)を使用します。このとき、widthSegmentsおよびheightSegmentsの値が小さすぎると、描画される映像がガタガタになりますので、ある程度大きな数字にします。
+three.jsのドキュメントページにリアルタイムにプロパティを変更できるプレビューがありますので、widthSegments/heightSegmentsがどういったものかはすぐにわかるでしょう。  
+[three.js SphereGeometry](http://threejs.org/docs/#Reference/Extras.Geometries/SphereGeometry)  
+カメラをSphereの中心に配置し、マテリアルを生成するときにレンダリングを行う面(side)をTHREE.BackSide(内側)もしくはTHREE.DoubleSideにすればＯＫです。
+
+```js
+var sphere = new THREE.
 
 ##おまけ その２ 立体視動画
 せっかく3Dコンテンツの立体視を行っていますので、動画も立体視が行えるようにしてみましょう。
