@@ -116,7 +116,7 @@ WebGLでレンダリングを行っているため、動画をステレオレン
 しかし、以下の2つ方法を行うことでこれを突破することができます。
 
 ###1. webkit-playsinline属性の追加
-まず初めに、(テクスチャーに使用する)videoエレメントに"webkit-playsinline"属性を追加します。
+まず初めに、(テクスチャーに使用する)videoエレメントに"webkit-playsinline"属性を追加します。  
 これにより、プレイヤーを起動せずにインラインプレイを行うという設定ができます。
 
 ```js
@@ -133,7 +133,7 @@ video.setAttribute('webkit-playsinline', true);
 ###2. "ホーム画面に追加”
 [STEP 5 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)
 [おまけ 360度動画の デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)
-そこで、次に行うのが”ホーム画面に追加"です。
+そこで、次に行うのが”ホーム画面に追加"です。  
 "ホーム画面に追加”を行うと、ホーム画面にアイコンが表示され、アイコンをタップするとWebサイトにアクセスすることができるようになります。
 
 この2つを行うことで、iPhoneのSafariではなくなりますが、ホーム画面に追加したアイコンからアクセスすると、動画を使ったWebGLコンテンツでも楽しむことができるようになります。
