@@ -143,7 +143,7 @@ video.setAttribute('webkit-playsinline', true);
 そんな難しいことではありません。  
 equirectangular(エクイレクタングラー、日本語では正距円筒図法)という投影方式に変換された動画を使用します。  
 equirectangularに変換された動画のサンプル  
-[equirectangular_sample](https://i.ytimg.com/vi/-9BenQJR6_E/default.jpg)](https://github.com/gtk2k/gtk2k.github.io/blob/master/aframe_videosphere/media/videos_s_3.mp4?raw=true)  
+![equirectangular_sample](https://github.com/gtk2k/gtk2k.github.io/blob/master/threejs-movietexture/equirectangular_sample.gif)  
 テクスチャーを張り付ける3DオブジェクトにSphere(球)を使用します。
 カメラをSphereの中心に配置し、マテリアルを生成するときにレンダリングを行う面(side)をTHREE.BackSideもしくはTHREE.DoubleSideにすれば
 ＯＫです。
