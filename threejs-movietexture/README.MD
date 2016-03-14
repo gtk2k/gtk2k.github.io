@@ -136,6 +136,6 @@ video.setAttribute('webkit-playsinline', true);
 そこで、次に行うのが”ホーム画面に追加"です。  
 "ホーム画面に追加”を行うと、ホーム画面にアイコンが表示され、アイコンをタップするとWebサイトにアクセスすることができるようになります。
 ![ホーム画面に追加](https://raw.githubusercontent.com/gtk2k/gtk2k.github.io/master/threejs-movietexture/add_to_homescreen.PNG)
-この2つを行うことで、iPhoneのSafariではなくなりますが、ホーム画面に追加したアイコンからアクセスすると、動画を使ったWebGLコンテンツでも楽しむことができるようになります。
+この2つを行うことで、厳密にはiPhoneのSafariではなくなりますが、ホーム画面に追加したアイコンからアクセスすると、動画を使ったWebGLコンテンツでも楽しむことができるようになります。
 
 以上
