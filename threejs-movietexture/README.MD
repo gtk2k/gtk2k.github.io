@@ -140,9 +140,10 @@ video.setAttribute('webkit-playsinline', true);
 ##おまけ その１ 360度動画
 [おまけ 360度動画の デモ\(A-Frameというフレームワークを使用しています\)](https://gtk2k.github.io/aframe_videosphere/index.html)  
 360度の動画を使えば、すべてを見渡せる映像コンテンツを作成することができます。  
-そんな難しいことではありません。equirectangular(エクイレクタングラー、日本語では正距円筒図法)という投影方式に変換された動画を使用します。
-equirectangularに変換された動画のサンプル
-[![IMAGE ALT TEXT HERE]](https://youtu.be/-9BenQJR6_E)
+そんな難しいことではありません。  
+equirectangular(エクイレクタングラー、日本語では正距円筒図法)という投影方式に変換された動画を使用します。  
+equirectangularに変換された動画のサンプル  
+[![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/-9BenQJR6_E/default.jpg)](https://youtu.be/-9BenQJR6_E)  
 テクスチャーを張り付ける3DオブジェクトにSphere(球)を使用します。
 カメラをSphereの中心に配置し、マテリアルを生成するときにレンダリングを行う面(side)をTHREE.BackSideもしくはTHREE.DoubleSideにすれば
 ＯＫです。
