@@ -82,7 +82,7 @@ STEP 1でWebGL上で動画を再生させました。実行自体はできるの
 ```js
 // videoエレメントからからテクスチャーを生成
 movieTexture = new THREE.Texture(video);
-// ★テクスチャーのminFilterをTHREE.LinearFilterに設定する。
+// ★テクスチャーのminFilterをTHREE.LinearFilterに設定するコードを追加
 movieTexture.minFilter = THREE.LinearFilter;
 ```
 
