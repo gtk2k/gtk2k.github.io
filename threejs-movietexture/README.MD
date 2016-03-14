@@ -92,8 +92,8 @@ movieTexture.minFilter = THREE.LinearFilter;
 STEP 2で出力され続ける警告を消すことができましたが、それでもまだ以下のような警告が出ます。
 ![警告その２](https://raw.githubusercontent.com/gtk2k/gtk2k.github.io/master/threejs-movietexture/texturesize_warning.png)
 これは動画の情報(特にサイズ)が読み込まれないうちに、レンダリングを行うと出る警告です。
-なので、動画の情報が読み込まれてからrender関数を実行すれば警告が出なくなります。
-(STEP 2もそうですが、動画に限らず画像でもこれらの警告が出ます)
+なので、動画の情報が読み込まれてからrender関数を実行すれば警告が出なくなります。  
+(STEP 2もそうですが、動画に限らず画像においてもでもこれらの警告が出ます)
 ```js
 // init関数の最後にrender()を行っている行を消しておく
 
