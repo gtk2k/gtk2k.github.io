@@ -141,7 +141,7 @@ video.setAttribute('webkit-playsinline', true);
 [おまけ 360度動画の デモ\(A-Frameというフレームワークを使用しています\)](https://gtk2k.github.io/aframe_videosphere/index.html)  
 360度の動画を使えば、すべてを見渡せる映像コンテンツを作成することができます。  
 そんな難しいことではありません。equirectangular(エクイレクタングラー、日本語では正距円筒図法)という投影方式に変換された動画を使用します。
-<video src="https://github.com/gtk2k/gtk2k.github.io/blob/master/aframe_videosphere/media/videos_s_3.mp4"/>
+![IMAGE ALT TEXT HERE](https://github.com/gtk2k/gtk2k.github.io/blob/master/aframe_videosphere/media/videos_s_3.mp4)
 テクスチャーを張り付ける3DオブジェクトにSphereを使用します。
 カメラをSphereの中心に配置し、マテリアルを生成するときにレンダリングを行う面(side)をTHREE.BackSideもしくはTHREE.DoubleSideにすれば
 ＯＫです。
