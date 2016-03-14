@@ -150,7 +150,13 @@ three.jsのドキュメントページにリアルタイムにプロパティを
 カメラをSphereの中心に配置し、マテリアルを生成するときにレンダリングを行う面(side)をTHREE.BackSide(内側)もしくはTHREE.DoubleSideにすればＯＫです。
 
 ```js
-var sphere = new THREE.
+// Sphereジオメトリを作成
+var geometry = new THREE.SphereGeometry(1000, 64, 64);
+var material = new THREE.MeshBasicMaterial({ map: movieTexture, side: THREE.BackSide });
+var mesh = new THREE.mesh(geometry, material);
+scene.add(mesh);
+```
+
 
 ##おまけ その２ 立体視動画
 せっかく3Dコンテンツの立体視を行っていますので、動画も立体視が行えるようにしてみましょう。
