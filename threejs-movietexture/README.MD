@@ -78,7 +78,7 @@ three.js(WebGL)では、HTMLのimgエレメント、canvasエレメント、vide
 [STEP 2 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)  
 STEP 1でWebGL上で動画を再生させました。実行自体はできるのですが、ただ、開発ツール(F12)を開いてみてください。  
 コンソールに以下のような警告が永遠と出力されていると思います。  
-
+![警告](https://raw.githubusercontent.com/gtk2k/gtk2k.github.io/master/threejs-movietexture/texturesize_warning.png)
 この警告を出力させないようにするには、警告が示すようにmovieTextureのminFilterをTHREE.NearestFilterかTHREE.LinearFilterに設定します。
 ```js
 // videoエレメントからからテクスチャーを生成
