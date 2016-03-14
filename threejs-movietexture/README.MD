@@ -132,7 +132,7 @@ video.setAttribute('webkit-playsinline', true);
 
 ###2. "ホーム画面に追加”
 [STEP 5 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)  
-[おまけ 360度動画の デモ\(A-Frameフレームワークを使用しています\)](https://gtk2k.github.io/aframe_videosphere/index.html)  
+[おまけ 360度動画の デモ\(A-Frameというフレームワークを使用しています\)](https://gtk2k.github.io/aframe_videosphere/index.html)  
 そこで、次に行うのが”ホーム画面に追加"です。  
 "ホーム画面に追加”を行うと、ホーム画面にアイコンが表示され、アイコンをタップするとWebサイトにアクセスすることができるようになります。
 ![ホーム画面に追加](https://raw.githubusercontent.com/gtk2k/gtk2k.github.io/master/threejs-movietexture/add_to_homescreen.PNG)
