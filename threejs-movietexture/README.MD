@@ -131,8 +131,8 @@ video.setAttribute('webkit-playsinline', true);
 ただし、これを行っただけではiPhoneのSafari上だと動画を再生すると全画面プレイヤーが表示されてしまいます。
 
 ###2. "ホーム画面に追加”
-[STEP 5 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)
-[おまけ 360度動画の デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)
+[STEP 5 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)  
+[おまけ 360度動画の デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)  
 そこで、次に行うのが”ホーム画面に追加"です。  
 "ホーム画面に追加”を行うと、ホーム画面にアイコンが表示され、アイコンをタップするとWebサイトにアクセスすることができるようになります。
 
