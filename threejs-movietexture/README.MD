@@ -132,10 +132,24 @@ video.setAttribute('webkit-playsinline', true);
 
 ###2. "ホーム画面に追加”
 [STEP 5 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)  
-[おまけ 360度動画の デモ\(A-Frameというフレームワークを使用しています\)](https://gtk2k.github.io/aframe_videosphere/index.html)  
 そこで、次に行うのが”ホーム画面に追加"です。  
 "ホーム画面に追加”を行うと、ホーム画面にアイコンが表示され、アイコンをタップするとWebサイトにアクセスすることができるようになります。
 ![ホーム画面に追加](https://raw.githubusercontent.com/gtk2k/gtk2k.github.io/master/threejs-movietexture/add_to_homescreen.PNG)
 この2つを行うことで、厳密にはiPhoneのSafariではなくなりますが、ホーム画面に追加したアイコンからアクセスすると、動画を使ったWebGLコンテンツでもiPhoneで楽しむことができるようになります。
+
+##おまけ その１ 360度動画
+[おまけ 360度動画の デモ\(A-Frameというフレームワークを使用しています\)](https://gtk2k.github.io/aframe_videosphere/index.html)  
+360度の動画を使えば、すべてを見渡せる映像コンテンツを作成することができます。  
+そんな難しいことではありません。equirectangular(エクイレクタングラー、日本語では正距円筒図法)という投影方式に変換された動画を使用します。
+<video src="https://github.com/gtk2k/gtk2k.github.io/blob/master/aframe_videosphere/media/videos_s_3.mp4"/>
+テクスチャーを張り付ける3DオブジェクトにSphereを使用します。
+カメラをSphereの中心に配置し、マテリアルを生成するときにレンダリングを行う面(side)をTHREE.BackSideもしくはTHREE.DoubleSideにすれば
+ＯＫです。
+
+##おまけ その２ 立体視動画
+せっかく3Dコンテンツの立体視を行っていますので、動画も立体視が行えるようにしてみましょう。
+そのためには、左目用の映像と右目用の映像が一つになった動画を使用します。
+方法はいくつかあるのですが、ここでは左目右目(camera)それぞれのレンダリングを行う直前で、テクスチャーのオフセットを切り替える方法で行ってみます。
+
 
 以上
