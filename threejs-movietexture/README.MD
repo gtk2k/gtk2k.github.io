@@ -78,7 +78,7 @@ three.js(WebGL)では、HTMLのimgエレメント、canvasエレメント、vide
 [STEP 2 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)  
 STEP 1でWebGL上で動画を再生させました。実行自体はできるのですが、ただ、開発ツール(F12)を開いてみてください。  
 コンソールに以下のような警告が永遠と出力されていると思います。  
-![警告](https://raw.githubusercontent.com/gtk2k/gtk2k.github.io/master/threejs-movietexture/texturesize_warning.png)
+![警告その１](https://raw.githubusercontent.com/gtk2k/gtk2k.github.io/master/threejs-movietexture/filter_warning.png)
 この警告を出力させないようにするには、警告が示すようにmovieTextureのminFilterをTHREE.NearestFilterかTHREE.LinearFilterに設定します。
 ```js
 // videoエレメントからからテクスチャーを生成
@@ -90,6 +90,7 @@ movieTexture.minFilter = THREE.LinearFilter;
 ##STEP 3: 計測を消す その２
 [STEP 3 デモ](https://gtk2k.github.io/threejs-movietexture/step2.html)  
 STEP 2で出力され続ける警告を消すことができましたが、それでもまだ以下のような警告が出ます。
+![警告その２](https://raw.githubusercontent.com/gtk2k/gtk2k.github.io/master/threejs-movietexture/texturesize_warning.png)
 これは動画の情報(特にサイズ)が読み込まれないうちに、レンダリングを行うと出る警告です。
 なので、動画の情報が読み込まれてからrender関数を実行すれば警告が出なくなります。
 ```js
