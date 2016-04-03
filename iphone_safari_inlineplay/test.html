@@ -8,11 +8,9 @@
         <audio id="aud" src="../aframe_videosphere_inlineplay/media/videos_s_3.mp4"></audio>
         <script>
             var c = 0;
-            video.load();
+            vid.load();
             document.onclick = function(){
-                video.currentTime += 1;
-                video.pause();
-                render();
+                vid.currentTime += 1;
             }
             
             function render(){
