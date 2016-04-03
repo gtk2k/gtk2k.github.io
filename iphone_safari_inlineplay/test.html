@@ -7,9 +7,9 @@
         <video id="vid" src="../aframe_videosphere_inlineplay/media/videos_s_3.mp4"></video>
         <audio id="aud" src="../aframe_videosphere_inlineplay/media/videos_s_3.mp4"></audio>
         <script>
-            video.onclick = function(){
+            document.onclick = function(){
                 aud.play();
-                
+                render();
             }
             
             function render(){
