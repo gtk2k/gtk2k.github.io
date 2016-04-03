@@ -72,6 +72,8 @@
         this.render = function () {
           // sync videoEl and audioEl
           this.videoEl.currentTime = this.audioEl.currentTime;
+          this.videoEl.style.display = 'none';
+          this.videoEl.style.display = '';
           this.videoEl.pause();
         }
         requestAnimationFrame(this.render);
