@@ -10,7 +10,10 @@
             var c = 0;
             vid.load();
             document.onclick = function(){
-                vid.currentTime += 1;
+                settimeout(function(){
+                    vid.pause();
+                }, 0);
+                render();
             }
             
             function render(){
