@@ -68,10 +68,12 @@
             !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullscreenElement) && splash.classList.add('vrmode');
           });
         }, false);
-      },
 
-      update: function (){
-        this.audioEl && (this.videoEl.currentTime = this.audioEl.currentTime);
+        this.render = function () {
+          // sync videoEl and audioEl
+          this.videoEl.currentTime = this.audioEl.currentTime;
+        }
+        requestAnimationFrame(this.render);
       }
     });
   </script>
