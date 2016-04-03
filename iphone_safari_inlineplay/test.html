@@ -10,9 +10,9 @@
             var c = 0;
             video.load();
             document.onclick = function(){
-                video.play();
                 video.currentTime += 1;
                 video.pause();
+                render();
             }
             
             function render(){
