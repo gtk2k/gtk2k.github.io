@@ -72,6 +72,7 @@
         this.render = function () {
           // sync videoEl and audioEl
           this.videoEl.currentTime = this.audioEl.currentTime;
+          this.el.components.material.needsUpdate = true;
         }
         requestAnimationFrame(this.render);
       }
