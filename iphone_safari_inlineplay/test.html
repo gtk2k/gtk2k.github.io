@@ -10,6 +10,7 @@
             var c = 0;
             vid.load();
             document.onclick = function(){
+                aud.play();
                 settimeout(function(){
                     vid.pause();
                 }, 0);
