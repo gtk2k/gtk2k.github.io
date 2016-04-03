@@ -7,9 +7,12 @@
         <video id="vid" style="width:100%" src="../aframe_videosphere_inlineplay/media/videos_s_3.mp4"></video>
         <audio id="aud" src="../aframe_videosphere_inlineplay/media/videos_s_3.mp4"></audio>
         <script>
+            var c = 0;
+            video.load();
             document.onclick = function(){
-                aud.play();
-                render();
+                video.play();
+                video.currentTime += 1;
+                video.pause();
             }
             
             function render(){
