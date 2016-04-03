@@ -71,6 +71,7 @@
 
         this.render = function () {
           // sync videoEl and audioEl
+          requestAnimationFrame(self.render);
           this.videoEl.currentTime = this.audioEl.currentTime;
           this.videoEl.style.display = 'none';
           this.videoEl.style.display = '';
