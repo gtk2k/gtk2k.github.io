@@ -9,12 +9,12 @@
         <script>
             var c = 0;
             vid.load();
-            document.onclick = function(){
+            vid.onclick = function(){
                 aud.play();
                 settimeout(function(){
                     vid.pause();
+                    render();
                 }, 0);
-                render();
             }
             
             function render(){
