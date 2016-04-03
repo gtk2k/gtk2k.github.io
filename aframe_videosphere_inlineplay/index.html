@@ -71,7 +71,7 @@
       },
 
       update: function (){
-        this.videoEl.currentTime = this.audioEl.currentTime;
+        this.audioEl && (this.videoEl.currentTime = this.audioEl.currentTime);
       }
     });
   </script>
