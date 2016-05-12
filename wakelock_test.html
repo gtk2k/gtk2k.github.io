@@ -15,16 +15,16 @@
       var objWL = new wakeLock();
       
       // Wake Lock開始
-      wakeLockStart.onclick = () => {
+      wakeLockStart.onclick = function () {
         objWL.request();
         msg.textContent = 'Wake Lock 中';
-      }
+      };
       
       // Wake Lock終了
-      wakeLockEnd.onclick = () => {
+      wakeLockEnd.onclick = function () {
         objWL.release();
         msg.textContent = 'Wake Lock 終了';
-      }
+      };
   </script>
 </body>
 </html>
