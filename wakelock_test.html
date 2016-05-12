@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>wakelock test</title>
+  <script src="wakelock.js"><?script>
+</head>
+<body>
+  <h2>Wake Lock TestPage</h2>
+  <button id="wakeLockStart">Wake Lock開始</button>
+  <button id="wakeLockEnd">Wake Lock終了</button>
+  <script>
+      var wakelock = new (getWakeLock())();
+      
+      // Wake Lock開始
+      wakeLockStart.onclick = () => wakelock.request();
+      
+      // Wake Lock終了
+      wakeLockEnd.onclick = () => wakelock.release();
+  </script>
+</body>
+</html>
