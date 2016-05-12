@@ -7,16 +7,23 @@
 </head>
 <body>
   <h2>Wake Lock TestPage</h2>
+  <p id="msg"></p>
   <button id="wakeLockStart">Wake Lock開始</button>
   <button id="wakeLockEnd">Wake Lock終了</button>
   <script>
       var wakelock = new (getWakeLock())();
       
       // Wake Lock開始
-      wakeLockStart.onclick = () => wakelock.request();
+      wakeLockStart.onclick = () => {
+        wakelock.request();
+        msg.textContent = 'Wake Lock 中';
+      }
       
       // Wake Lock終了
-      wakeLockEnd.onclick = () => wakelock.release();
+      wakeLockEnd.onclick = () => {
+        wakelock.release();
+        msg.textContent = 'Wake Lock 終了';
+      }
   </script>
 </body>
 </html>
