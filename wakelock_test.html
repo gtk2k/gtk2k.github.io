@@ -11,17 +11,18 @@
   <button id="wakeLockStart">Wake Lock開始</button>
   <button id="wakeLockEnd">Wake Lock終了</button>
   <script>
-      var wakelock = new (getWakeLock())();
+      var wakeLock = getWakeLock();
+      var objWL = new wakeLock();
       
       // Wake Lock開始
       wakeLockStart.onclick = () => {
-        wakelock.request();
+        objWL.request();
         msg.textContent = 'Wake Lock 中';
       }
       
       // Wake Lock終了
       wakeLockEnd.onclick = () => {
-        wakelock.release();
+        objWL.release();
         msg.textContent = 'Wake Lock 終了';
       }
   </script>
