@@ -7,8 +7,9 @@
         <video id="localView"></video>
         <video id="remoteView"></video>
         <button id="btnStart">start</button>
+        <script src="https://localhost:4000/socket.io/socket.io.js"></script>
         <script>
-            //var signalingChannel = new SignalingChannel();
+            var signalingChannel = io.connect('https://localhost:4000');
             var configuration = { "iceServers": [{ "urls": "stun:stun.l.google.com:19302" }] };
             var pc;
             // call start() to initiate
