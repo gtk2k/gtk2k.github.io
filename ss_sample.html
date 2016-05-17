@@ -53,7 +53,7 @@
                 }, logError);
             }
             
-            function setSelfStream(elm, stream) {
+            function setStream(elm, stream) {
                 elm.src = URL.createObjectURL(stream);
                 pc.addStream(stream);
             }
