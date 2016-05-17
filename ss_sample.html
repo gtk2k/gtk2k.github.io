@@ -8,9 +8,6 @@
         <video id="remoteView" autoplay></video>
         <input id="btnStart" type="button" value="接続" />
         <script>
-            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
-            window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection;
-            
             // signalingChannelのインスタンスは拡張機能で生成
             //var signalingChannel = new SignalingChannel();
             
@@ -22,7 +19,7 @@
             };
 
             function start(isCaller) {
-                pc = new RTCPeerConnection(configuration);
+                pc = new webkitRTCPeerConnection(configuration);
                 pc.onicecandidate = (evt) => {
                     if(evt.candidate)
                         signalingChannel.send({ candidate: evt.candidate });
@@ -33,7 +30,7 @@
                 pc.onaddstream = (evt) => {
                     remoteView.src = URL.createObjectURL(evt.stream);
                 };
-                navigator.getUserMedia({ audio: false, video: true }, (stream) => {
+                navigator.webkitGetUserMedia({ audio: false, video: true }, (stream) => {
                     if(isCaller) { // 呼び出し元の場合スクリーンキャプチャストリームを追加
                         // スクリーンキャプチャストリームのストリームIDを取得
                         chrome.runtime.sendMessage('djjnhdinbajmcmpffkpdjiiaegllppbk', 'getSourceId', (res) => {
