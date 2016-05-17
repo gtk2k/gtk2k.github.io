@@ -37,7 +37,7 @@
                             if(res.sourceId){
                                 // スクリーンキャプチャのストリーム取得
                                 navigator.webkitGetUserMedia(
-                                    { audio: false, video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: streamId, maxWidth: 1920, maxHeight: 1080 } } },
+                                    { audio: false, video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: res.sourceId, maxWidth: 1920, maxHeight: 1080 } } },
                                     (ssStream) => {
                                         // カメラのメディアストリームにスクリーンキャプチャのVideoトラック追加
                                         stream.addTrack(ssStream.getVideoTraks()[0]);
