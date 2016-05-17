@@ -23,16 +23,16 @@
 
             function start(isCaller) {
                 pc = new RTCPeerConnection(configuration);
-                pc.onicecandidate = function (evt) {
+                pc.onicecandidate = (evt) => {
                     evt.candidate && signalingChannel.send({ candidate: evt.candidate }));
                 };
-                pc.onnegotiationneeded = function () {
+                pc.onnegotiationneeded = () => {
                     pc.createOffer(localDescCreated, logError);
                 }
-                pc.onaddstream = function (evt) {
+                pc.onaddstream = (evt) => {
                     remoteView.src = URL.createObjectURL(evt.stream);
                 };
-                navigator.getUserMedia({ audio: false, video: true }, function (stream) {
+                navigator.getUserMedia({ audio: false, video: true }, (stream) => {
                     if(isCallker) { // 呼び出し元の場合スクリーンキャプチャストリームを追加
                         // スクリーンキャプチャストリームのストリームIDを取得
                         chrome.runtime.sendMessage('djjnhdinbajmcmpffkpdjiiaegllppbk', 'getSourceId', (res) => {
