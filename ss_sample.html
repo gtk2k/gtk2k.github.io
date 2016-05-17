@@ -14,21 +14,22 @@
             // signalingChannelのインスタンスは拡張機能で生成
             //var signalingChannel = new SignalingChannel();
             
-            var configuration = { iceServers: [{ url: 'stun:stun.example.org' }] };
-            var pc;
+            const configuration = { iceServers: [{ url: 'stun:stun.example.org' }] };
+            let pc;
             
             btnStart.onclick = () => {
                 start(true);
-            }
+            };
 
             function start(isCaller) {
                 pc = new RTCPeerConnection(configuration);
                 pc.onicecandidate = (evt) => {
-                    evt.candidate && signalingChannel.send({ candidate: evt.candidate }));
+                    if(evt.candidate)
+                        signalingChannel.send({ candidate: evt.candidate }));
                 };
                 pc.onnegotiationneeded = () => {
                     pc.createOffer(localDescCreated, logError);
-                }
+                };
                 pc.onaddstream = (evt) => {
                     remoteView.src = URL.createObjectURL(evt.stream);
                 };
@@ -39,34 +40,27 @@
                             if(res.sourceId){
                                 // スクリーンキャプチャのストリーム取得
                                 navigator.webkitGetUserMedia(
-                                    {
-                                        audio: false,
-                                        video: {
-                                            mandatory: {
-                                                chromeMediaSource: 'desktop',
-                                                chromeMediaSourceId: streamId,
-                                                maxWidth: 1920,
-                                                maxHeight: 1080
-                                            }
-                                        }
-                                    },
+                                    { audio: false, video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: streamId, maxWidth: 1920, maxHeight: 1080 } } },
                                     (ssStream) => {
-                                        let ssVideoTrack = ssStream.getVideoTraks()[0];
                                         // カメラのメディアストリームにスクリーンキャプチャのVideoトラック追加
-                                        stream.addTrack(ssVideoTrack);
-                                        selfView.src = URL.createObjectURL(stream);
-                                        pc.addStream(stream);
+                                        stream.addTrack(ssStream.getVideoTraks()[0]);
+                                        setStream(selfView, stream);
                                     },
                                     (err) => console.log('ssGetStrem error', err)
                                 );
                             }
-                        })
+                        });
                     } else {
-                        pc.addStream(stream);
+                        setStream(selfView, stream);
                     }
                 }, logError);
             }
-
+            
+            function setSelfStream(elm, stream) {
+                elm.src = URL.createObjectURL(stream);
+                pc.addStream(stream);
+            }
+            
             function localDescCreated(desc) {
                 pc.setLocalDescription(desc, () => {
                     signalingChannel.send({ sdp: pc.localDescription });
@@ -79,11 +73,15 @@
             
             function signalingChannelCreated() {
                 signalingChannel.onmessage = (msg) => {
-                    !pc && start();
-                    msg.sdp && pc.setRemoteDescription(new RTCSessionDescription(msg.sdp), () => {
-                        (pc.remoteDescription.type === 'offer') && pc.createAnswer(localDescCreated, logError);
-                    }, logError);
-                    msg.candidate && pc.addIceCandidate(new RTCIceCandidate(msg.candidate), () => {}, logError);
+                    if(!pc)
+                        start();
+                    if(msg.sdp)
+                        pc.setRemoteDescription(new RTCSessionDescription(msg.sdp), () => {
+                            if(pc.remoteDescription.type === 'offer')
+                                pc.createAnswer(localDescCreated, logError);
+                        }, logError);
+                    if(msg.candidate) 
+                        pc.addIceCandidate(new RTCIceCandidate(msg.candidate), () => {}, logError);
                 };
             }
         </script>
