@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <video id="selfView" autoplay></video>
+        <video id="remoteView" autoplay></video>
+        <input id="btnStart" type="button"　value="接続" />
+        <script>
+            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+            window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection;
+            
+            // signalingChannelのインスタンスは拡張機能で生成
+            //var signalingChannel = new SignalingChannel();
+            
+            var configuration = { "iceServers": [{ "url": "stun:stun.example.org" }] };
+            var pc;
+            
+            btnStart.onclick = () => {
+                start(true);
+            }
+
+            function start(isCaller) {
+                pc = new RTCPeerConnection(configuration);
+                pc.onicecandidate = function (evt) {
+                    evt.candidate && signalingChannel.send(JSON.stringify({ "candidate": evt.candidate }));
+                };
+                pc.onnegotiationneeded = function () {
+                    pc.createOffer(localDescCreated, logError);
+                }
+                pc.onaddstream = function (evt) {
+                    remoteView.src = URL.createObjectURL(evt.stream);
+                };
+                navigator.getUserMedia({ audio: false, video: true }, function (stream) {
+                    if(isCallker) { // 呼び出し元の場合スクリーンキャプチャストリームを追加
+                        // スクリーンキャプチャストリームのストリームIDを取得
+                        chrome.runtime.sendMessage('djjnhdinbajmcmpffkpdjiiaegllppbk', 'getSourceId', (res) => {
+                            if(res.sourceId){
+                                // スクリーンキャプチャのストリーム取得
+                                navigator.webkitGetUserMedia(
+                                    {
+                                        audio: false,
+                                        video: {
+                                            mandatory: {
+                                                chromeMediaSource: 'desktop',
+                                                chromeMediaSourceId: streamId,
+                                                maxWidth: 1920,
+                                                maxHeight: 1080
+                                            }
+                                        }
+                                    },
+                                    (ssStream) => {
+                                        let ssVideoTrack = ssStream.getVideoTraks()[0];
+                                        // カメラのメディアストリームにスクリーンキャプチャのVideoトラック追加
+                                        stream.addTrack(ssVideoTrack);
+                                        pc.addStream(stream);
+                                    },
+                                    (err) => console.log('ssGetStrem error', err)
+                                );
+                            }
+                        })
+                    } else {
+                        pc.addStream(stream);
+                    }
+                }, logError);
+            }
+
+            function localDescCreated(desc) {
+                pc.setLocalDescription(desc, function () {
+                    signalingChannel.send(JSON.stringify({ "sdp": pc.localDescription }));
+                }, logError);
+            }
+
+            signalingChannel.onmessage = function (evt) {
+                !pc && start();
+                var message = JSON.parse(evt.data);
+                message.sdp && pc.setRemoteDescription(new RTCSessionDescription(message.sdp), function () {
+                    (pc.remoteDescription.type == "offer") && pc.createAnswer(localDescCreated, logError);
+                }, logError);
+                message.candidate && pc.addIceCandidate(new RTCIceCandidate(message.candidate), function () { }, logError);
+            };
+
+            function logError(error) {
+                console.log(error);
+            }
+        </script>
+    </body>
+</html>
