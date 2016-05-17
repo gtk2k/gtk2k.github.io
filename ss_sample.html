@@ -40,7 +40,7 @@
                                     { audio: false, video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: res.sourceId, maxWidth: 1920, maxHeight: 1080 } } },
                                     (ssStream) => {
                                         // カメラのメディアストリームにスクリーンキャプチャのVideoトラック追加
-                                        stream.addTrack(ssStream.getVideoTraks()[0]);
+                                        stream.addTrack(ssStream.getVideoTracks()[0]);
                                         setStream(selfView, stream);
                                     },
                                     (err) => console.log('ssGetStrem error', err)
