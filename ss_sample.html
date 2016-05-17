@@ -33,7 +33,7 @@
                 navigator.webkitGetUserMedia({ audio: false, video: true }, (stream) => {
                     if(isCaller) { // 呼び出し元の場合スクリーンキャプチャストリームを追加
                         // スクリーンキャプチャストリームのストリームIDを取得
-                        chrome.runtime.sendMessage('djjnhdinbajmcmpffkpdjiiaegllppbk', { typ: 'getSourceId' }, (res) => {
+                        chrome.runtime.sendMessage('djjnhdinbajmcmpffkpdjiiaegllppbk', { type: 'getSourceId' }, (res) => {
                             if(res.sourceId){
                                 // スクリーンキャプチャのストリーム取得
                                 navigator.webkitGetUserMedia(
