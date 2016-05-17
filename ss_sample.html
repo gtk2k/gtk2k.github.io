@@ -76,7 +76,7 @@
                 console.log(error);
             }
             
-            signalingChannelCreated() {
+            function signalingChannelCreated() {
                 signalingChannel.onmessage = function (evt) {
                     !pc && start();
                     var message = JSON.parse(evt.data);
