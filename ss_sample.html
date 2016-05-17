@@ -72,17 +72,19 @@
                 }, logError);
             }
 
-            signalingChannel.onmessage = function (evt) {
-                !pc && start();
-                var message = JSON.parse(evt.data);
-                message.sdp && pc.setRemoteDescription(new RTCSessionDescription(message.sdp), function () {
-                    (pc.remoteDescription.type == "offer") && pc.createAnswer(localDescCreated, logError);
-                }, logError);
-                message.candidate && pc.addIceCandidate(new RTCIceCandidate(message.candidate), function () { }, logError);
-            };
-
             function logError(error) {
                 console.log(error);
+            }
+            
+            signalingChannelCreated() {
+                signalingChannel.onmessage = function (evt) {
+                    !pc && start();
+                    var message = JSON.parse(evt.data);
+                    message.sdp && pc.setRemoteDescription(new RTCSessionDescription(message.sdp), function () {
+                        (pc.remoteDescription.type == "offer") && pc.createAnswer(localDescCreated, logError);
+                    }, logError);
+                    message.candidate && pc.addIceCandidate(new RTCIceCandidate(message.candidate), function () { }, logError);
+                };
             }
         </script>
     </body>
