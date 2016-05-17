@@ -6,7 +6,7 @@
     <body>
         <video id="selfView" autoplay></video>
         <video id="remoteView" autoplay></video>
-        <input id="btnStart" type="button"　value="接続" />
+        <input id="btnStart" type="button" value="接続" />
         <script>
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
             window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection;
@@ -14,7 +14,7 @@
             // signalingChannelのインスタンスは拡張機能で生成
             //var signalingChannel = new SignalingChannel();
             
-            var configuration = { "iceServers": [{ "url": "stun:stun.example.org" }] };
+            var configuration = { iceServers: [{ url: 'stun:stun.example.org' }] };
             var pc;
             
             btnStart.onclick = () => {
@@ -24,7 +24,7 @@
             function start(isCaller) {
                 pc = new RTCPeerConnection(configuration);
                 pc.onicecandidate = function (evt) {
-                    evt.candidate && signalingChannel.send(JSON.stringify({ "candidate": evt.candidate }));
+                    evt.candidate && signalingChannel.send({ candidate: evt.candidate }));
                 };
                 pc.onnegotiationneeded = function () {
                     pc.createOffer(localDescCreated, logError);
@@ -68,7 +68,7 @@
 
             function localDescCreated(desc) {
                 pc.setLocalDescription(desc, function () {
-                    signalingChannel.send(JSON.stringify({ "sdp": pc.localDescription }));
+                    signalingChannel.send({ sdp: pc.localDescription });
                 }, logError);
             }
 
@@ -76,14 +76,13 @@
                 console.log(error);
             }
             
-            signalingChannelCreated() {
-                signalingChannel.onmessage = function (evt) {
+            function signalingChannelCreated() {
+                signalingChannel.onmessage = function (msg) {
                     !pc && start();
-                    var message = JSON.parse(evt.data);
-                    message.sdp && pc.setRemoteDescription(new RTCSessionDescription(message.sdp), function () {
-                        (pc.remoteDescription.type == "offer") && pc.createAnswer(localDescCreated, logError);
+                    msg.sdp && pc.setRemoteDescription(new RTCSessionDescription(msg.sdp), () => {
+                        (pc.remoteDescription.type === 'offer') && pc.createAnswer(localDescCreated, logError);
                     }, logError);
-                    message.candidate && pc.addIceCandidate(new RTCIceCandidate(message.candidate), function () { }, logError);
+                    msg.candidate && pc.addIceCandidate(new RTCIceCandidate(msg.candidate), function () { }, logError);
                 };
             }
         </script>
