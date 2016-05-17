@@ -82,7 +82,7 @@
                     msg.sdp && pc.setRemoteDescription(new RTCSessionDescription(msg.sdp), () => {
                         (pc.remoteDescription.type === 'offer') && pc.createAnswer(localDescCreated, logError);
                     }, logError);
-                    msg.candidate && pc.addIceCandidate(new RTCIceCandidate(msg.candidate), function () { }, logError);
+                    msg.candidate && pc.addIceCandidate(new RTCIceCandidate(msg.candidate), () => {}, logError);
                 };
             }
         </script>
