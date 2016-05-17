@@ -54,6 +54,7 @@
                                         let ssVideoTrack = ssStream.getVideoTraks()[0];
                                         // カメラのメディアストリームにスクリーンキャプチャのVideoトラック追加
                                         stream.addTrack(ssVideoTrack);
+                                        selfView.src = URL.createObjectURL(stream);
                                         pc.addStream(stream);
                                     },
                                     (err) => console.log('ssGetStrem error', err)
@@ -67,7 +68,7 @@
             }
 
             function localDescCreated(desc) {
-                pc.setLocalDescription(desc, function () {
+                pc.setLocalDescription(desc, () => {
                     signalingChannel.send({ sdp: pc.localDescription });
                 }, logError);
             }
@@ -77,7 +78,7 @@
             }
             
             function signalingChannelCreated() {
-                signalingChannel.onmessage = function (msg) {
+                signalingChannel.onmessage = (msg) => {
                     !pc && start();
                     msg.sdp && pc.setRemoteDescription(new RTCSessionDescription(msg.sdp), () => {
                         (pc.remoteDescription.type === 'offer') && pc.createAnswer(localDescCreated, logError);
