@@ -34,7 +34,7 @@
                     remoteView.src = URL.createObjectURL(evt.stream);
                 };
                 navigator.getUserMedia({ audio: false, video: true }, (stream) => {
-                    if(isCallker) { // 呼び出し元の場合スクリーンキャプチャストリームを追加
+                    if(isCaller) { // 呼び出し元の場合スクリーンキャプチャストリームを追加
                         // スクリーンキャプチャストリームのストリームIDを取得
                         chrome.runtime.sendMessage('djjnhdinbajmcmpffkpdjiiaegllppbk', 'getSourceId', (res) => {
                             if(res.sourceId){
