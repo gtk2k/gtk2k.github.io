@@ -25,7 +25,7 @@
                 pc = new RTCPeerConnection(configuration);
                 pc.onicecandidate = (evt) => {
                     if(evt.candidate)
-                        signalingChannel.send({ candidate: evt.candidate }));
+                        signalingChannel.send({ candidate: evt.candidate });
                 };
                 pc.onnegotiationneeded = () => {
                     pc.createOffer(localDescCreated, logError);
