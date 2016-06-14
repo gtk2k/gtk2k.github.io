@@ -13,7 +13,7 @@
         //this.el.sceneEl.addBehavior(this);
         this.videoEl = document.querySelector(this.el.components.material.textureSrc);
         if (!this.videoEl) return;
-        if (!/android|iphone|ipod|ipad/i.test(navigator.userAgent)) {
+        if(true){//if (!/android|iphone|ipod|ipad/i.test(navigator.userAgent)) {
           // pc
           this.videoEl.play();
           return;
