@@ -23,7 +23,7 @@
         <div id="msg"></div>
         <script>
             window.ondeviceorientation = (evt) => {
-                msg.textContent = evt.beta + ' , ' + evt.gamma;
+                msg.inenrHTML = '<br><br>' + evt.beta + '<br>' + evt.gamma;
                 var b = Math.max(0, Math.min(evt.beta, 50));
                 var g = Math.max(0, Math.min(evt.gamma, 50));
                 pointer.style.left = (b / 50 * 100) + '%';
