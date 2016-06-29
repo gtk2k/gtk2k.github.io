@@ -27,7 +27,7 @@
         <div id="msg"></div>
         <script>
             window.ondeviceorientation = (evt) => {
-                msg.inenrHTML = '<br><br><p>' + (evt.beta) + '</p><br><p>' + (evt.gamma) + '</p>';
+                msg.innerHTML = '<br><br><p>' + (evt.beta) + '</p><br><p>' + (evt.gamma) + '</p>';
                 var b = Math.max(0, Math.min(evt.beta, 50));
                 var g = Math.max(0, Math.min(evt.gamma, 50));
                 var a = Math.max(0, Math.min(evt.alpha, 50));
