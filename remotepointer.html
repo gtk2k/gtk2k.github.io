@@ -28,11 +28,11 @@
         <script>
             window.ondeviceorientation = (evt) => {
                 msg.innerHTML = '<br><br><p>' + (evt.beta) + '</p><br><p>' + (evt.gamma) + '</p>';
-                var b = Math.max(0, Math.min(evt.beta, 50));
+                var b = -Math.max(-90, Math.min(evt.beta, 0));
                 var g = Math.max(0, Math.min(evt.gamma, 50));
-                var a = Math.max(0, Math.min(evt.alpha, 50));
+                var a = Math.max(-45, Math.min(evt.alpha, 45));
                 pointer.style.left = (a / 50 * 100) + '%';
-                pointer.style.top = (a / 50 * 100) + '%';
+                pointer.style.top = (b / 50 * 100) + '%';
             }
         </script>
     </body>
