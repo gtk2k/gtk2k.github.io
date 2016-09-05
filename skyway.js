@@ -1498,7 +1498,7 @@ Socket.prototype._setWSTimeout = function(){
 
 /** Is the websocket currently open? */
 Socket.prototype._wsOpen = function() {
-  return this._socket && this._socket.readyState == 1;
+  return false;//this._socket && this._socket.readyState == 1;
 }
 
 /** Send queued messages. */
